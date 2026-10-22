@@ -584,7 +584,7 @@
       <div class="topbar-inner">
         <div>
           <h1>机会雷达 Alpha</h1>
-          <p class="subtitle">从评论证据出发，按「人群 → 主题域 → 需求簇 → 机会假设」阅读用户声音。</p>
+          <p class="subtitle">从评论证据出发，按「人群 → 家长关心的问题 → 具体需求 → 机会假设」阅读用户声音。</p>
         </div>
         <div class="field">
           <label for="audienceSelect">人群</label>
@@ -595,7 +595,7 @@
       </div>
     </header>
 
-    <div class="notice">本页不重新采集数据。当前人群为小学一年级家长；顶层卡片是主题域摘要，不直接等于产品机会。可行动的机会假设在需求簇下钻后查看，供给与缺口仍需人工和公开资料继续校验。</div>
+    <div class="notice">本页不重新采集数据。当前人群为小学一年级家长；顶部卡片用于定位家长最关心的问题，点开后继续看具体需求、评论证据、供给与缺口。</div>
     <div id="sampleLine" class="sample-line"></div>
     <div id="app" class="loading">正在读取已有样本数据...</div>
   </div>
@@ -604,7 +604,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=012";
+    const LEGACY_DATA_URL = "grade1-data.json?v=013";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -873,15 +873,15 @@
         ${openAux.supply ? `<p class="context">沿用已有官网核验记录及下列日期，本次发布未重新核验。仅核验官网宣称与内容形式，不证明评论家长用过、适用或有效；不是机会结论。</p><ul class="list">${mapData.supply_catalog.map(item => renderSupply(item).replace("</li>", `<br>关联观察主题：${escapeHtml((item.theme_names || []).join("、"))}<br>官网核验日期：${escapeHtml(item.checked_at)}</li>`)).join("")}</ul>` : ""}
       </section>` : ""}${rows.length ? `<section class="evidence">
         <button class="small-button" type="button" data-aux="unassigned" aria-expanded="${Boolean(openAux.unassigned)}">${openAux.unassigned ? "收起" : "展开"}年龄尚未确认的评论（全样本 ${formatNum(rows.length)} 条）</button>
-        ${openAux.unassigned ? `<p class="context">以下为全样本未知或歧义年龄评论，不随确龄筛选归组，不生成主题域摘要，也不计入确龄证据。</p><div class="evidence-head"><h2>待确认评论 ${formatNum(limit)} / ${formatNum(rows.length)}</h2>${renderEvidenceActions("unassigned-pool", limit, rows.length)}</div>${rows.slice(0, limit).map(renderEvidence).join("")}` : ""}
+        ${openAux.unassigned ? `<p class="context">以下为全样本未知或歧义年龄评论，不随确龄筛选归组，不生成问题卡片，也不计入确龄证据。</p><div class="evidence-head"><h2>待确认评论 ${formatNum(limit)} / ${formatNum(rows.length)}</h2>${renderEvidenceActions("unassigned-pool", limit, rows.length)}</div>${rows.slice(0, limit).map(renderEvidence).join("")}` : ""}
       </section>` : ""}${renderCounterexamples()}`;
     }
 
     function ageEmptyState() {
       const stats = mapData.sample_stats || {};
       const message = mapData.collection_status === "not_collected"
-        ? "还未实采，当前没有真实评论，不生成主题域摘要。"
-        : `已有采集输入：原始评论 ${formatNum(stats.raw_comment_count)} 条，未知或歧义年龄 ${formatNum(stats.unassigned_comment_count)} 条。当前所选年龄段无确龄且命中主题的证据；年龄待确认评论不进入主题域摘要。`;
+        ? "还未实采，当前没有真实评论，不生成问题卡片。"
+        : `已有采集输入：原始评论 ${formatNum(stats.raw_comment_count)} 条，未知或歧义年龄 ${formatNum(stats.unassigned_comment_count)} 条。当前所选年龄段无确龄且命中主题的证据；年龄待确认评论不进入问题卡片。`;
       const queries = mapData.collection_status === "not_collected" ? (mapData.query_groups || []).map(group => `<p><strong>计划 ${escapeHtml(group.label)}</strong>：${escapeHtml((group.query_seeds || []).join("、"))}</p>`).join("") : "";
       return `<div class="empty"><p>${escapeHtml(message)}</p>${queries}<p>当前已核验供给 ${formatNum(mapData.verified_supply_count)} 项；官网能力不等于评论家长用过或有效。</p></div>`;
     }
@@ -973,7 +973,8 @@
       const stats = mapData.sample_stats || {};
       const recon = mapData.count_reconciliation || {};
       if (AGE_MODE) return "";
-      return `<section class="evidence-policy"><strong>证据口径：</strong>原始评论 ${formatNum(stats.raw_comment_count)} = 主证据 ${formatNum(stats.valid_comment_count)} + 低信号 ${formatNum(stats.low_signal_count)} + 未匹配 ${formatNum(stats.unmatched_comment_count)} + 拦截 ${formatNum(stats.intercepted_comment_count)} + 间接需求 ${formatNum(stats.indirect_signal_count)}。主计数默认展示全部直接需求证据；内容强信号、产品强诉求、产品弱信号和资料噪声只在子需求点内作为局部筛选，不改变主题域/需求簇主计数。顶层卡片是主题域摘要，用来定位讨论范围；真正的机会假设在子需求点展开后查看。机构帖下家长咨询作为间接需求信号，不计入主计数。评论证据按「证据强度优先、同档内点赞数排序」展示；帖子标题只作为每条评论末尾的弱语境标签。未匹配 ${formatNum(stats.unmatched_comment_count)} 条（${formatNum(Math.round((recon.unmatched_rate || 0) * 1000) / 10)}%）。</section>`;
+      const cardCount = visibleOpportunities().reduce((sum, opp) => sum + countComments(opp), 0);
+      return `<section class="evidence-policy"><strong>口径说明：</strong>有效需求评论 ${formatNum(stats.valid_comment_count)} 条，是过滤营销、低信号、未匹配和间接需求后的家长需求评论；当前卡片内评论 ${formatNum(cardCount)} 条，是已经归入本页 7 个主题卡片的有效评论，所以会小于有效需求评论。未进入卡片的评论保留在页面底部台账中，供复核和后续补簇。</section>`;
     }
 
     function renderSampleLine() {
@@ -998,18 +999,11 @@
       const rawSourceCounts = stats.source_counts || {};
       const scopeText = sampleScopeText();
       sampleLine.innerHTML = [
-        `<span class="pill">默认展示全部证据</span>`,
-        `<span class="pill">主题域证据 ${formatNum(visibleOpportunities().reduce((sum, opp) => sum + countComments(opp), 0))}</span>`,
         `<span class="pill">原始评论 ${formatNum(stats.raw_comment_count)}</span>`,
-        `<span class="pill">原始小红书 ${formatNum(rawSourceCounts["小红书"])}</span>`,
-        `<span class="pill">原始抖音 ${formatNum(rawSourceCounts["抖音"])}</span>`,
-        `<span class="pill">主证据 ${formatNum(stats.valid_comment_count)}</span>`,
-        `<span class="pill">主证据小红书 ${formatNum(sourceCounts["小红书"])}</span>`,
-        `<span class="pill">主证据抖音 ${formatNum(sourceCounts["抖音"])}</span>`,
-        `<span class="pill">低信号 ${formatNum(stats.low_signal_count)}</span>`,
-        `<span class="pill">间接需求 ${formatNum(stats.indirect_signal_count)}</span>`,
-        `<span class="pill">未匹配 ${formatNum(stats.unmatched_comment_count)}</span>`,
-        `<span class="pill">拦截 ${formatNum(stats.intercepted_comment_count)}</span>`,
+        `<span class="pill">有效需求评论 ${formatNum(stats.valid_comment_count)}</span>`,
+        `<span class="pill">当前卡片内评论 ${formatNum(visibleOpportunities().reduce((sum, opp) => sum + countComments(opp), 0))}</span>`,
+        `<span class="pill">有效小红书 ${formatNum(sourceCounts["小红书"])}</span>`,
+        `<span class="pill">有效抖音 ${formatNum(sourceCounts["抖音"])}</span>`,
         `<span class="pill">帖子/视频 ${formatNum(stats.post_count)}</span>`,
         `<span class="pill">搜索第一页样本${scopeText ? ` · ${escapeHtml(scopeText)}` : ""}</span>`
       ].join("");
@@ -1032,7 +1026,7 @@
       renderSampleLine();
       const cards = visibleOpportunities().map((opp, index) => renderCard(opp, index + 1)).join("");
       app.className = "opportunity-list";
-      app.innerHTML = renderEvidencePolicy() + (cards || (AGE_MODE ? ageEmptyState() : `<div class="empty">暂无主题域摘要。</div>`)) + (AGE_MODE ? renderAgeAppendices() : renderLegacyAppendices());
+      app.innerHTML = renderEvidencePolicy() + (cards || (AGE_MODE ? ageEmptyState() : `<div class="empty">暂无问题卡片。</div>`)) + (AGE_MODE ? renderAgeAppendices() : renderLegacyAppendices());
       app.querySelectorAll("[data-aux]").forEach(button => {
         button.addEventListener("click", () => {
           openAux[button.dataset.aux] = !openAux[button.dataset.aux];
@@ -1102,7 +1096,6 @@
       const isOpen = openId === opp.id;
       const count = countComments(opp);
       const sourceText = mergeSourceCounts(opp).map(([source, value]) => `${source} ${formatNum(value)}`).join(" / ");
-      const cardLabel = AGE_MODE ? "机会假设" : "主题域摘要";
       const displayTitle = AGE_MODE ? opp.title : themeDomainTitle(opp);
       const displaySummary = AGE_MODE ? opp.sentence : themeDomainSummary(opp);
       return `
@@ -1112,13 +1105,13 @@
               <div class="rank-title">
                 ${AGE_MODE ? "" : `<span class="rank">${rank}</span>`}
                 <div>
-                  <div class="eyebrow">${escapeHtml(cardLabel)}</div>
+                  ${AGE_MODE ? `<div class="eyebrow">机会假设</div>` : ""}
                   <div class="title">${escapeHtml(displayTitle)}</div>
-                  <div class="summary">${escapeHtml(displaySummary)}</div>
+                  ${AGE_MODE ? `<div class="summary">${escapeHtml(displaySummary)}</div>` : ""}
                   ${AGE_MODE ? `<div class="summary">${escapeHtml(opp.hypothesis_status || "待验证假设，不构成需求成立结论")}</div>` : ""}
                 </div>
               </div>
-              <div class="metric"><strong>${formatNum(count)}</strong>${AGE_MODE ? "证据评论" : "主题域证据"}<br>${escapeHtml(sourceText)}${AGE_MODE ? `<br>已识别帖子 ${formatNum(opp.evidence_summary?.post_count ?? opp.post_count ?? 0)}${(opp.evidence_summary?.post_count ?? opp.post_count ?? 0) <= 1 ? " · 单帖样本不足" : ""}<br>已观察供给 ${formatNum((opp.supply || []).length)} · 验证点 ${formatNum((opp.validation || []).length)}` : ""}</div>
+              <div class="metric"><strong>${formatNum(count)}</strong>${AGE_MODE ? "证据评论" : "条评论"}<br>${escapeHtml(sourceText)}${AGE_MODE ? `<br>已识别帖子 ${formatNum(opp.evidence_summary?.post_count ?? opp.post_count ?? 0)}${(opp.evidence_summary?.post_count ?? opp.post_count ?? 0) <= 1 ? " · 单帖样本不足" : ""}<br>已观察供给 ${formatNum((opp.supply || []).length)} · 验证点 ${formatNum((opp.validation || []).length)}` : ""}</div>
               <span class="toggle-mark">${isOpen ? "−" : "+"}</span>
             </div>
           </button>
@@ -1139,7 +1132,7 @@
       const names = clusters.slice(0, 3).map(cluster => cluster.name).filter(Boolean).join("、");
       const more = clusters.length > 3 ? `等 ${formatNum(clusters.length)} 个需求簇` : `${formatNum(clusters.length)} 个需求簇`;
       const sourceText = mergeSourceCounts(opp).map(([source, value]) => `${source} ${formatNum(value)}`).join(" / ");
-      return `${formatNum(countComments(opp))} 条直接证据（${sourceText || "暂无平台分布"}），覆盖${names ? `「${names}」${more}` : more}。`;
+      return `${formatNum(countComments(opp))} 条评论（${sourceText || "暂无平台分布"}），覆盖${names ? `「${names}」${more}` : more}。`;
     }
 
     function renderDetails(opp) {
@@ -1239,7 +1232,7 @@
         <div>
           <button class="cluster-row ${isOpen ? "active" : ""}" type="button" data-cluster-key="${escapeHtml(clusterKey)}" data-sub-need-id="${escapeHtml(subNeed.sub_need_id)}" aria-expanded="${isOpen}">
             <span class="cluster-name">${escapeHtml(subNeed.name)}</span>
-            <span class="cluster-count">全部 ${formatNum(totalEvidence.length)} 条 · 内容强 ${formatNum(counts.content)} · 产品强 ${formatNum(counts.product)} · 产品弱 ${formatNum(counts.productWeak)}</span>
+            <span class="cluster-count">${formatNum(totalEvidence.length)} 条</span>
             <span class="toggle-mark">${isOpen ? "−" : "+"}</span>
           </button>
           ${isOpen ? `<div class="cluster-panel">${renderOpportunityHypothesisCard(opp, subNeed, totalEvidence, counts)}${renderMindFunnel(subNeed, totalEvidence, evidence, scope, limitKey, evidenceLimit, visibleEvidence, counts)}</div>` : ""}
@@ -1327,7 +1320,7 @@
       return {
         mentioned: mentioned.slice(0, 6),
         publicCandidates: publicCandidates.slice(0, 6),
-        note: mentioned.length || publicCandidates.length ? "以上是供给对照，不代表已验证适配或效果；是否满足该需求仍需访谈、试用和公开资料复核。" : "当前证据未稳定指向明确供给，需补做公开供给扫描。"
+        note: mentioned.length || publicCandidates.length ? "" : "待补充公开供给扫描。"
       };
     }
 
@@ -1415,10 +1408,10 @@
 
     function specificProblemFromEvidence(evidenceCount, snippets, categories) {
       if (evidenceCount <= 3) {
-        return `样本偏少，暂不能稳定归纳为单一具体问题；需先复核这些评论是否真的同属该子需求。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
+        return "样本偏少，暂不能稳定归纳为单一具体问题；需先复核这些评论是否真的同属该子需求。";
       }
       const categoryText = categories.length ? categories.join("、") : "该子需求";
-      return `${categoryText}相关问题仍需继续拆细；当前先以评论原文校准具体卡点。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
+      return `${categoryText}相关问题仍需继续拆细；当前先以评论原文校准具体卡点。`;
     }
 
     function signalCounts(evidence) {
@@ -1437,18 +1430,8 @@
         const groupEvidence = filterEvidenceByIds(evidence, group.all_evidence || []);
         return { ...group, all_evidence: groupEvidence, comment_count: groupEvidence.length };
       }).filter(group => group.comment_count > 0);
-      const scopeTitle = EVIDENCE_SCOPE_META[scope]?.label || EVIDENCE_SCOPE_META.all.label;
       const scopeMeta = `${formatNum(visibleEvidence.length)} / ${formatNum(evidence.length)} 条 · 全部 ${formatNum(totalEvidence.length)} 条`;
-      if (!groups.length) {
-        return `<div><div class="cluster-panel-title"><div><div class="cluster-name">${escapeHtml(scopeTitle)}</div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceScopeActions(limitKey, scope, counts)}${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div>${visibleEvidence.map(renderEvidence).join("") || `<div class="empty">${escapeHtml(EVIDENCE_SCOPE_META[scope]?.empty || "暂无评论证据。")}</div>`}</div>`;
-      }
-      let remaining = evidenceLimit;
-      return `<div class="cluster-panel-title"><div><div class="cluster-name">评论证据 · ${escapeHtml(scopeTitle)}</div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceScopeActions(limitKey, scope, counts)}${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div><div class="funnel-list">${groups.map(group => {
-        const take = Math.max(0, Math.min(group.all_evidence.length, remaining));
-        remaining -= take;
-        const rows = group.all_evidence.slice(0, take);
-        return `<section class="funnel-block"><div><div class="cluster-name">${escapeHtml(group.name)} · ${formatNum(group.comment_count)} 条</div><div class="context">${escapeHtml(group.summary || "")}</div></div>${rows.map(renderEvidence).join("")}${take === 0 ? `<div class="context">点击“更多”继续查看该阶段证据。</div>` : ""}</section>`;
-      }).join("")}</div>`;
+      return `<div><div class="cluster-panel-title"><div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div>${visibleEvidence.map(renderEvidence).join("") || `<div class="empty">暂无评论证据。</div>`}</div>`;
     }
 
     function renderEvidenceScopeActions(id, scope, counts) {
