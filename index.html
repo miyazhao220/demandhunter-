@@ -604,7 +604,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=011";
+    const LEGACY_DATA_URL = "grade1-data.json?v=012";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -1238,7 +1238,7 @@
       return `
         <div>
           <button class="cluster-row ${isOpen ? "active" : ""}" type="button" data-cluster-key="${escapeHtml(clusterKey)}" data-sub-need-id="${escapeHtml(subNeed.sub_need_id)}" aria-expanded="${isOpen}">
-            <span class="cluster-name">${escapeHtml(subNeed.name)}<span class="context">${escapeHtml(subNeed.summary || "")}</span></span>
+            <span class="cluster-name">${escapeHtml(subNeed.name)}</span>
             <span class="cluster-count">全部 ${formatNum(totalEvidence.length)} 条 · 内容强 ${formatNum(counts.content)} · 产品强 ${formatNum(counts.product)} · 产品弱 ${formatNum(counts.productWeak)}</span>
             <span class="toggle-mark">${isOpen ? "−" : "+"}</span>
           </button>
