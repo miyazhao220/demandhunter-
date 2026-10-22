@@ -604,7 +604,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=014";
+    const LEGACY_DATA_URL = "grade1-data.json?v=015";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -720,6 +720,7 @@
     let selectedAudience = "all";
     let evidenceScopes = {};
     let openAux = {};
+    let pendingScrollTarget = "";
 
     const EVIDENCE_SCOPE_META = {
       all: { label: "全部证据", empty: "该子需求点暂无评论证据。" },
@@ -1037,6 +1038,7 @@
         button.addEventListener("click", () => {
           openId = openId === button.dataset.id ? null : button.dataset.id;
           if (openId && !evidenceLimits[openId]) evidenceLimits[openId] = INITIAL_EVIDENCE_LIMIT;
+          syncHashState(openId ? { opportunityId: openId } : {});
           render();
         });
       });
@@ -1074,6 +1076,7 @@
             const limitKey = clusterLimitKey(opportunityId, clusterId);
             if (!evidenceLimits[limitKey]) evidenceLimits[limitKey] = INITIAL_EVIDENCE_LIMIT;
           }
+          syncHashState(openClusterIds[opportunityId] ? { opportunityId, clusterId } : { opportunityId });
           render();
         });
       });
@@ -1082,13 +1085,73 @@
           event.stopPropagation();
           const clusterKey = button.dataset.clusterKey;
           const subNeedId = button.dataset.subNeedId;
+          const [opportunityId, clusterId] = clusterKey.split("::");
           openSubNeedIds[clusterKey] = openSubNeedIds[clusterKey] === subNeedId ? null : subNeedId;
           if (openSubNeedIds[clusterKey]) {
             const limitKey = subNeedLimitKey(clusterKey, subNeedId);
             if (!evidenceLimits[limitKey]) evidenceLimits[limitKey] = INITIAL_EVIDENCE_LIMIT;
           }
+          syncHashState(openSubNeedIds[clusterKey] ? { opportunityId, clusterId, subNeedId } : { opportunityId, clusterId });
           render();
         });
+      });
+      scrollToPendingTarget();
+    }
+
+    function applyHashState() {
+      if (typeof window === "undefined" || !window.location || !window.location.hash) return;
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      const opportunityId = params.get("opp");
+      const clusterId = params.get("cluster");
+      const subNeedId = params.get("sub");
+      if (!opportunityId || !visibleOpportunities().some(opp => opp.id === opportunityId)) return;
+      openId = null;
+      openClusterIds = {};
+      openSubNeedIds = {};
+      openId = opportunityId;
+      pendingScrollTarget = `.opportunity-button[data-id="${cssEscape(opportunityId)}"]`;
+      evidenceLimits[opportunityId] = evidenceLimits[opportunityId] || INITIAL_EVIDENCE_LIMIT;
+      if (clusterId) {
+        openClusterIds[opportunityId] = clusterId;
+        const clusterKey = clusterLimitKey(opportunityId, clusterId);
+        pendingScrollTarget = `[data-cluster-id="${cssEscape(clusterId)}"][data-opportunity-id="${cssEscape(opportunityId)}"]`;
+        evidenceLimits[clusterKey] = evidenceLimits[clusterKey] || INITIAL_EVIDENCE_LIMIT;
+        if (subNeedId) {
+          openSubNeedIds[clusterKey] = subNeedId;
+          const limitKey = subNeedLimitKey(clusterKey, subNeedId);
+          pendingScrollTarget = `[data-sub-need-id="${cssEscape(subNeedId)}"][data-cluster-key="${cssEscape(clusterKey)}"]`;
+          evidenceLimits[limitKey] = evidenceLimits[limitKey] || INITIAL_EVIDENCE_LIMIT;
+        }
+      }
+    }
+
+    function syncHashState({ opportunityId, clusterId, subNeedId }) {
+      if (typeof window === "undefined" || !window.location || !window.history || typeof window.history.replaceState !== "function") return;
+      const url = new URL(window.location.href);
+      if (!opportunityId) {
+        url.hash = "";
+      } else {
+        const params = new URLSearchParams();
+        params.set("opp", opportunityId);
+        if (clusterId) params.set("cluster", clusterId);
+        if (subNeedId) params.set("sub", subNeedId);
+        url.hash = params.toString();
+      }
+      window.history.replaceState(null, "", url.href);
+    }
+
+    function cssEscape(value) {
+      if (typeof CSS !== "undefined" && CSS.escape) return CSS.escape(value);
+      return String(value).replace(/["\\]/g, "\\$&");
+    }
+
+    function scrollToPendingTarget() {
+      if (!pendingScrollTarget || typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") return;
+      const selector = pendingScrollTarget;
+      pendingScrollTarget = "";
+      window.requestAnimationFrame(() => {
+        const target = document.querySelector(selector);
+        if (target) target.scrollIntoView({ block: "start", behavior: "smooth" });
       });
     }
 
@@ -1535,21 +1598,15 @@
         <div class="evidence">
           <p class="quote">“${escapeHtml(comment.comment_text)}”</p>
           <div class="meta">
-            ${comment.source_type ? `<span class="signal-tag">来源：${escapeHtml(comment.source_type)}</span>` : ""}
-            ${comment.commenter_type ? `<span class="signal-tag">评论者：${escapeHtml(comment.commenter_type)}</span>` : ""}
-            ${comment.semantic_type ? `<span class="signal-tag">语义：${escapeHtml(comment.semantic_type)}</span>` : ""}
-            ${comment.intent_profile?.summary_hint ? `<span class="signal-tag">${escapeHtml(comment.intent_profile.summary_hint)}</span>` : ""}
             <span>${escapeHtml(source)}</span>
             <span>${escapeHtml(author)}</span>
             ${keyword ? `<span>${escapeHtml(keyword)}</span>` : ""}
-            ${AGE_MODE && comment.record_id ? `<span>证据 ${escapeHtml(comment.record_id)}</span>` : ""}
-            ${AGE_MODE && comment.run_id ? `<span>来源运行 ${escapeHtml(comment.run_id)}</span>` : ""}
             ${AGE_MODE && ["unknown", "ambiguous"].includes(comment.audience_id) ? `<span>${comment.audience_id === "ambiguous" ? "年龄/学段有歧义" : "年龄未明确"}</span>` : ""}
             <span>点赞 ${likes == null ? "未提供" : formatNum(likes)}</span>
             <span>回复 ${replies == null ? "未提供" : formatNum(replies)}</span>
             ${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noreferrer">${linkLabel}</a>` : ""}
           </div>
-          ${postTitle ? `<div class="source-tail">来源小尾巴：${escapeHtml(postTitle.slice(0, 90))}${postTitle.length > 90 ? "..." : ""}</div>` : ""}
+          ${postTitle ? `<div class="source-tail">原帖：${escapeHtml(postTitle.slice(0, 90))}${postTitle.length > 90 ? "..." : ""}</div>` : ""}
           ${AGE_MODE && (comment.comment_context || comment.parent_post_context) ? `<div class="context">语境：${escapeHtml(comment.comment_context || comment.parent_post_context)}</div>` : ""}
           ${AGE_MODE && comment.audience_basis ? `<div class="context">年龄依据：${escapeHtml(typeof comment.audience_basis === "string" ? comment.audience_basis : Object.values(comment.audience_basis).join("；"))}</div>` : ""}
         </div>
@@ -1598,12 +1655,20 @@
       })
       .then(data => {
         mapData = data;
+        applyHashState();
         render();
       })
       .catch(error => {
         app.className = "empty";
         app.innerHTML = AGE_MODE ? "读取数据失败，请检查公开数据文件是否可访问后重试。" : `读取数据失败：${escapeHtml(error.message)}。请通过本地服务访问本页。`;
       });
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+      window.addEventListener("hashchange", () => {
+        if (!mapData) return;
+        applyHashState();
+        render();
+      });
+    }
   </script>
 </body>
 </html>
