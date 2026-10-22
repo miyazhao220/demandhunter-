@@ -1,0 +1,129 @@
+{
+  "schema_version": "2026-10-22.grade1-supply-catalog.v1",
+  "audience": "小学一年级家长",
+  "purpose": "把一年级家长机会雷达中提到或应核验的供给侧对象结构化，供页面、复盘和后续人工供给扫描复用。",
+  "evidence_boundary": "本文件只记录候选供给类型、代表产品和待核验问题；不等于评论家长真实使用过，也不证明产品有效。",
+  "last_updated": "2026-10-22",
+  "items": [
+    {
+      "supply_id": "SUP-G1-FOUNDATION-APP",
+      "name": "洪恩拼音/识字、悟空拼音/识字、魔比识字、四五快读等基础学习 App/内容",
+      "category": "拼音识字与基础学习 App",
+      "related_opportunity_ids": ["learning-foundation-loop"],
+      "related_theme_ids": ["T01"],
+      "related_cluster_ids": ["T01-C3", "T01-C1", "T01-C2"],
+      "solves": "帮助家长给孩子做拼音、识字、阅读、口算等基础练习，提供课程化内容或闯关练习。",
+      "observed_from": ["评论/原帖提及", "公开供给候选"],
+      "open_questions": ["是否能诊断孩子真实卡点，而不只是增加练习量", "是否能把家长不会讲的问题转成可执行讲解", "孩子是否能持续使用并迁移到校内作业"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-PRACTICE-CORRECTION",
+      "name": "小猿口算、作业帮口算、拍照批改、专项练习册、试卷和资料包",
+      "category": "练习与批改工具/资料",
+      "related_opportunity_ids": ["learning-foundation-loop", "homework-execution-system"],
+      "related_theme_ids": ["T01", "T02"],
+      "related_cluster_ids": ["T01-C2", "T01-C3", "T02-C1", "T02-C3"],
+      "solves": "让家长更快获得可打印、可练、可批改的内容，降低找题和订正成本。",
+      "observed_from": ["评论/原帖提及", "公开供给候选"],
+      "open_questions": ["资料需求背后的具体学习卡点是什么", "家长需要题目、讲解、批改还是复盘计划", "低质量资料和营销引流如何过滤"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-LEARNING-DEVICE",
+      "name": "学而思学习机/学而思 AI、小猿 AI、作业帮学习机、科大讯飞、希沃、步步高等学习机/学习平板",
+      "category": "学习机与 AI 辅导硬件",
+      "related_opportunity_ids": ["learning-tools-selection", "learning-foundation-loop"],
+      "related_theme_ids": ["T12", "T01"],
+      "related_cluster_ids": ["T12-C1", "T12-C2", "T01-C3"],
+      "solves": "提供讲题、同步学习、AI 答疑、资源聚合和一定程度的家长替代陪练。",
+      "observed_from": ["评论/原帖提及", "公开供给候选"],
+      "open_questions": ["真实家庭使用后是否减少家长陪学时间", "不同学习基础孩子是否适配", "价格、内容会员和闲置风险如何影响决策"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-HOMEWORK-HABIT",
+      "name": "计时器、计划表、习惯打卡工具、任务拆解表、亲子沟通课程",
+      "category": "作业执行与习惯工具",
+      "related_opportunity_ids": ["homework-execution-system"],
+      "related_theme_ids": ["T02"],
+      "related_cluster_ids": ["T02-C1", "T02-C2", "T02-C3"],
+      "solves": "帮助家庭把作业、订正、听写、阅读打卡等任务拆解并推进，减少催促和冲突。",
+      "observed_from": ["公开供给候选"],
+      "open_questions": ["家长最想降低作业时长、提醒次数还是亲子冲突", "孩子能否自执行还是仍依赖家长", "工具是否能和校内作业反馈闭环"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-ATTENTION-INTERVENTION",
+      "name": "专注力训练课程、感统训练机构、儿童发展评估、家庭训练清单",
+      "category": "专注力/发展评估与干预",
+      "related_opportunity_ids": ["attention-and-intervention-path"],
+      "related_theme_ids": ["T04"],
+      "related_cluster_ids": ["T04-C1", "T04-C2", "T04-C3"],
+      "solves": "帮助家长判断走神、坐不住、久练不会等表现是否需要专业评估或家庭训练。",
+      "observed_from": ["评论/原帖提及", "公开供给候选"],
+      "open_questions": ["哪些情况只是学习习惯问题，哪些应分流到专业评估", "轻量筛查如何避免医疗化误导", "家庭训练能否持续执行并被老师反馈验证"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-AFTER-SCHOOL-CARE",
+      "name": "校内课后服务、社区托管、晚辅导、一对一上门/线上辅导、接送看护服务",
+      "category": "课后托管与辅导服务",
+      "related_opportunity_ids": ["after-school-care-decision"],
+      "related_theme_ids": ["T07"],
+      "related_cluster_ids": ["T07-C1", "T07-C2", "T07-C3"],
+      "solves": "解决放学后接送、看管、作业完成和辅导资源不足。",
+      "observed_from": ["公开供给候选"],
+      "open_questions": ["家长选择时最看重安全、完成作业、学会程度、距离还是价格", "服务过程和效果能否被透明记录", "机会更像信息比较、服务撮合还是机构端工具"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-SCHOOL-COMMUNICATION",
+      "name": "家校沟通 App、班级群、沟通话术、事件记录、儿童心理咨询、校园安全课程",
+      "category": "家校沟通与校园安全支持",
+      "related_opportunity_ids": ["school-feedback-and-safety"],
+      "related_theme_ids": ["T06"],
+      "related_cluster_ids": ["T06-C1", "T06-C2", "T06-C3"],
+      "solves": "帮助家长在老师反馈、孩子表达异常、同伴冲突或疑似不当对待时判断如何沟通和升级。",
+      "observed_from": ["公开供给候选"],
+      "open_questions": ["哪些情况需要话术，哪些需要事件记录或外部介入", "如何保护隐私并避免激化家校关系", "T06-C2 目前证据不足，是否需访谈验证"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-STUDY-SPACE",
+      "name": "学习桌椅、护眼灯/大路灯、词典笔、错题机/打印机、书柜收纳",
+      "category": "学习空间与硬件消费决策",
+      "related_opportunity_ids": ["learning-tools-selection"],
+      "related_theme_ids": ["T12"],
+      "related_cluster_ids": ["T12-C1", "T12-C2", "T12-C3"],
+      "solves": "帮助家长解决学习空间、护眼、打印、收纳和工具配置决策。",
+      "observed_from": ["评论/原帖提及", "公开供给候选"],
+      "open_questions": ["哪些是刚需，哪些是种草焦虑", "家长更看重价格、品牌、空间适配还是减少陪学负担", "买回家后的真实使用频次和闲置原因是什么"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-TRANSITION-CONTENT",
+      "name": "幼小衔接课程、入学准备清单、时间管理表、家长社群、开学陪跑内容",
+      "category": "幼小衔接与入学适应内容/服务",
+      "related_opportunity_ids": ["school-transition-rhythm"],
+      "related_theme_ids": ["T03", "T05"],
+      "related_cluster_ids": ["T03-C1", "T03-C2", "T05-C1"],
+      "solves": "帮助家长判断入学前后准备程度、作息调整、超前学习边界和适应问题。",
+      "observed_from": ["公开供给候选"],
+      "open_questions": ["家长真正需要清单、时间规划、适应判断还是持续陪跑", "不同家庭变量如何影响路径", "是否能形成开学前后 30-60 天低负担陪跑产品"],
+      "status": "待公开资料复核"
+    },
+    {
+      "supply_id": "SUP-G1-INTEREST-CLASS",
+      "name": "兴趣班、试听课、机构对比、测评推荐、时间规划工具",
+      "category": "兴趣班与素养决策",
+      "related_opportunity_ids": ["interest-class-decision"],
+      "related_theme_ids": ["T13"],
+      "related_cluster_ids": ["T13-C1", "T13-C2", "T13-C3"],
+      "solves": "帮助家长在运动、美术、书法、音乐、口才等兴趣班之间做取舍和节奏安排。",
+      "observed_from": ["公开供给候选"],
+      "open_questions": ["家长最在意升学、身体素质、兴趣探索还是社交比较", "不同城市和预算下是否有可复用取舍框架", "供给缺口是测评推荐、试听管理、时间规划还是口碑透明度"],
+      "status": "待公开资料复核"
+    }
+  ]
+}
