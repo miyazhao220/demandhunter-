@@ -597,7 +597,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=008";
+    const LEGACY_DATA_URL = "grade1-data.json?v=009";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -1167,22 +1167,9 @@
     }
 
     function renderThemeDomainDetails(opp, clusters, secondaryCount) {
-      const domainTitle = themeDomainTitle(opp);
-      const evidenceCount = countComments(opp);
-      const sourceText = mergeSourceCounts(opp).map(([source, value]) => `${source} ${formatNum(value)}`).join(" / ") || "暂无平台分布";
-      const subNeedCount = clusters.reduce((sum, cluster) => sum + ((cluster.sub_need_points || []).length || 1), 0);
-      const topClusters = clusters.slice(0, 3).map(cluster => `${cluster.name}（${formatNum(collectClusterEvidence(cluster).length)}）`).join("、") || "暂无稳定需求簇";
-      const firstCluster = clusters[0];
-      const firstSubNeeds = firstCluster ? subNeedPreview(firstCluster) : "暂无可下钻子需求";
       return `
-        <div class="judgement">
-          <div class="fact"><div class="fact-label">主题域</div><div class="fact-value">${escapeHtml(domainTitle)}</div></div>
-          <div class="fact"><div class="fact-label">证据结构</div><div class="fact-value">${formatNum(evidenceCount)} 条直接证据；${escapeHtml(sourceText)}</div></div>
-          <div class="fact"><div class="fact-label">主要需求簇</div><div class="fact-value">${escapeHtml(topClusters)}</div></div>
-          <div class="fact"><div class="fact-label">下钻深度</div><div class="fact-value">${formatNum(clusters.length)} 个需求簇，${formatNum(subNeedCount)} 个子需求点；优先看「${escapeHtml(firstCluster?.name || "暂无") }」下的 ${escapeHtml(firstSubNeeds)}。</div></div>
-        </div>
         <section class="section cluster-section">
-          <h2>需求簇（展开后查看机会假设）</h2>
+          <h2>需求簇</h2>
           ${secondaryCount ? `<p>因工具/兴趣班等硬优先路由转出 ${formatNum(secondaryCount)} 条，已记录为副簇计数，不在此处发散展示。</p>` : ""}
           <div class="cluster-list">${clusters.map(cluster => renderClusterRow(opp, cluster)).join("")}</div>
         </section>
@@ -1199,10 +1186,9 @@
     function renderClusterRow(opp, cluster) {
       const isOpen = openClusterIds[opp.id] === cluster.cluster_id;
       const totalCount = collectClusterEvidence(cluster).length;
-      const preview = subNeedPreview(cluster);
       return `
         <button class="cluster-row ${isOpen ? "active" : ""}" type="button" data-opportunity-id="${escapeHtml(opp.id)}" data-cluster-id="${escapeHtml(cluster.cluster_id)}" aria-expanded="${isOpen}">
-          <span class="cluster-name">${escapeHtml(cluster.name)}${preview ? `<span class="context">子需求：${escapeHtml(preview)}</span>` : ""}</span>
+          <span class="cluster-name">${escapeHtml(cluster.name)}</span>
           <span class="cluster-count">${formatNum(totalCount)} 条${cluster.cluster_id === "T06-C2" && (cluster.comment_count || 0) <= 1 ? " · 证据不足" : ""}</span>
           <span class="toggle-mark">${isOpen ? "−" : "+"}</span>
         </button>
