@@ -597,7 +597,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=006";
+    const LEGACY_DATA_URL = "grade1-data.json?v=007";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -1096,6 +1096,8 @@
       const count = countComments(opp);
       const sourceText = mergeSourceCounts(opp).map(([source, value]) => `${source} ${formatNum(value)}`).join(" / ");
       const cardLabel = AGE_MODE ? "机会假设" : "主题域摘要";
+      const displayTitle = AGE_MODE ? opp.title : themeDomainTitle(opp);
+      const displaySummary = AGE_MODE ? opp.sentence : themeDomainSummary(opp);
       return `
         <article class="opportunity-card">
           <button class="opportunity-button ${isOpen ? "active" : ""}" type="button" data-id="${escapeHtml(opp.id)}" aria-expanded="${isOpen}">
@@ -1104,8 +1106,8 @@
                 ${AGE_MODE ? "" : `<span class="rank">${rank}</span>`}
                 <div>
                   <div class="eyebrow">${escapeHtml(cardLabel)}</div>
-                  <div class="title">${escapeHtml(opp.title)}</div>
-                  <div class="summary">${escapeHtml(opp.sentence)}</div>
+                  <div class="title">${escapeHtml(displayTitle)}</div>
+                  <div class="summary">${escapeHtml(displaySummary)}</div>
                   ${AGE_MODE ? `<div class="summary">${escapeHtml(opp.hypothesis_status || "待验证假设，不构成需求成立结论")}</div>` : ""}
                 </div>
               </div>
@@ -1120,11 +1122,23 @@
       `;
     }
 
+    function themeDomainTitle(opp) {
+      const names = (opp.themeIds || []).map(id => findTheme(id)?.concern_name).filter(Boolean);
+      return names.length ? names.join(" / ") : opp.title;
+    }
+
+    function themeDomainSummary(opp) {
+      const clusters = findClusters(opp);
+      const names = clusters.slice(0, 3).map(cluster => cluster.name).filter(Boolean).join("、");
+      const more = clusters.length > 3 ? `等 ${formatNum(clusters.length)} 个需求簇` : `${formatNum(clusters.length)} 个需求簇`;
+      return `该主题域包含 ${formatNum(countComments(opp))} 条直接证据，覆盖${names ? `「${names}」${more}` : more}；本层只用于定位讨论范围，需展开需求簇和子需求点查看机会假设。`;
+    }
+
     function renderDetails(opp) {
       const clusters = findClusters(opp);
       const secondaryCount = opp.themeIds.reduce((sum, themeId) => sum + (findTheme(themeId)?.secondary_route_count || 0), 0);
+      if (!AGE_MODE) return renderThemeDomainDetails(opp, clusters, secondaryCount);
       return `
-        ${AGE_MODE ? "" : `<div class="evidence-policy"><strong>主题域摘要：</strong>以下「谁、场景、问题、当前办法、供给缺口」是对该主题域下多个需求簇的综合概括，帮助先判断讨论范围；如果要决定做产品、工具或内容选题，请继续展开需求簇和子需求点，查看更细粒度的机会假设与评论证据。</div>`}
         <div class="judgement">
           <div class="fact"><div class="fact-label">谁</div><div class="fact-value">${escapeHtml(opp.who)}</div></div>
           <div class="fact"><div class="fact-label">什么场景</div><div class="fact-value">${escapeHtml(opp.scene)}</div></div>
@@ -1148,6 +1162,18 @@
             <div class="cluster-list">${clusters.map(cluster => renderClusterRow(opp, cluster)).join("")}</div>
           </section>
         </div>
+      `;
+    }
+
+    function renderThemeDomainDetails(opp, clusters, secondaryCount) {
+      return `
+        <div class="evidence-policy"><strong>主题域摘要：</strong>这里不再生成机会卡。顶层只用于回答“这批评论落在哪个讨论范围”，实际可判断的机会假设请继续展开到需求簇和子需求点。</div>
+        <section class="section cluster-section">
+          <h2>需求簇与机会假设</h2>
+          <p>按评论证据聚合出的需求簇如下；展开需求簇后可查看更细的子需求点、机会假设、证据强弱和原文。</p>
+          ${secondaryCount ? `<p>因工具/兴趣班等硬优先路由转出 ${formatNum(secondaryCount)} 条，已记录为副簇计数，不在此处发散展示。</p>` : ""}
+          <div class="cluster-list">${clusters.map(cluster => renderClusterRow(opp, cluster)).join("")}</div>
+        </section>
       `;
     }
 
@@ -1243,7 +1269,15 @@
       const card = subNeed.insight_card || {};
       const evidenceCount = totalEvidence.length;
       const title = subNeed.name || "未命名子需求点";
-      const problem = card.core_pain_summary || subNeed.summary || title;
+      const snippets = evidenceSnippets(totalEvidence, 2);
+      const categories = evidenceCategories(totalEvidence, [title, subNeed.summary, card.core_pain_summary].join(" "));
+      const genericSummary = isGenericInsight(card.core_pain_summary) || isGenericInsight(subNeed.summary);
+      const problem = genericSummary
+        ? specificProblemFromEvidence(evidenceCount, snippets, categories)
+        : card.core_pain_summary || subNeed.summary || title;
+      const scene = genericSummary
+        ? specificSceneFromEvidence(snippets, categories)
+        : subNeed.summary || `围绕「${title}」出现求助、吐槽、询价或经验交流时`;
       const failure = card.existing_solution_failure || "现有评论暂未稳定体现解法失效点，需要结合更多评论或访谈补足。";
       const contentSignals = counts?.content || 0;
       const productSignals = counts?.product || 0;
@@ -1266,7 +1300,7 @@
         title,
         confidence,
         who: AGE_MODE ? "当前所选年龄段家长" : "小学一年级家长中命中该子需求点的人群",
-        scene: subNeed.summary || "围绕该子需求点出现求助、吐槽、询价或经验交流时",
+        scene,
         problem,
         current,
         failure,
@@ -1274,6 +1308,46 @@
         supplyGap,
         validation
       };
+    }
+
+    function isGenericInsight(text) {
+      const value = String(text || "").trim();
+      if (!value) return true;
+      return /具体困难|遇到.*困难|暂无可稳定拆出|该需求簇暂无|求助、吐槽、询价|卡点：[^。；，]*遇到/u.test(value);
+    }
+
+    function evidenceSnippets(rows, limit = 2) {
+      return dedupeEvidence(rows || [])
+        .map(row => String(row.comment_text || "").replace(/\s+/g, " ").trim())
+        .filter(Boolean)
+        .slice(0, limit)
+        .map(text => text.length > 42 ? `${text.slice(0, 42)}...` : text);
+    }
+
+    function evidenceCategories(rows, fallbackText = "") {
+      const text = `${fallbackText} ${(rows || []).map(row => row.comment_text || "").join(" ")}`;
+      const categories = [];
+      if (/拼音|声母|韵母|平翘舌|拼读|音节/u.test(text)) categories.push("拼音拼读");
+      if (/识字|认字|生字|写字|笔顺|默写|听写/u.test(text)) categories.push("识字写字");
+      if (/阅读|读题|读书|精读|朗读|绘本/u.test(text)) categories.push("阅读读题");
+      if (/数学|口算|计算|应用题|思维/u.test(text)) categories.push("数学计算");
+      if (/作业|拖拉|订正|陪写|坐不住/u.test(text)) categories.push("作业执行");
+      if (/学习桌|台灯|学习机|打印机|练习册|资料|链接|工具/u.test(text)) categories.push("工具/资料选择");
+      return [...new Set(categories)].slice(0, 4);
+    }
+
+    function specificSceneFromEvidence(snippets, categories) {
+      const categoryText = categories.length ? categories.join("、") : "该子需求";
+      if (snippets.length) return `围绕${categoryText}，评论中出现“${snippets.join("”“")}”这类具体讨论。`;
+      return `围绕${categoryText}出现求助、吐槽、询价或经验交流时。`;
+    }
+
+    function specificProblemFromEvidence(evidenceCount, snippets, categories) {
+      if (evidenceCount <= 3) {
+        return `现有证据偏少，暂不能稳定归纳为单一具体问题；需先复核这些评论是否真的同属该子需求。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
+      }
+      const categoryText = categories.length ? categories.join("、") : "该子需求";
+      return `${categoryText}相关问题仍需继续拆细；当前先以评论原文校准具体卡点。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
     }
 
     function signalCounts(evidence) {
