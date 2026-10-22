@@ -597,7 +597,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=009";
+    const LEGACY_DATA_URL = "grade1-data.json?v=010";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -1235,7 +1235,7 @@
             <span class="cluster-count">全部 ${formatNum(totalEvidence.length)} 条 · 内容强 ${formatNum(counts.content)} · 产品强 ${formatNum(counts.product)} · 产品弱 ${formatNum(counts.productWeak)}</span>
             <span class="toggle-mark">${isOpen ? "−" : "+"}</span>
           </button>
-          ${isOpen ? `<div class="cluster-panel">${renderOpportunityHypothesisCard(subNeed, totalEvidence, counts)}${renderInsightCard(subNeed)}${renderMindFunnel(subNeed, totalEvidence, evidence, scope, limitKey, evidenceLimit, visibleEvidence, counts)}</div>` : ""}
+          ${isOpen ? `<div class="cluster-panel">${renderOpportunityHypothesisCard(subNeed, totalEvidence, counts)}${renderMindFunnel(subNeed, totalEvidence, evidence, scope, limitKey, evidenceLimit, visibleEvidence, counts)}</div>` : ""}
         </div>
       `;
     }
@@ -1248,26 +1248,19 @@
             <div class="eyebrow">机会假设卡片</div>
             <h3 class="hypothesis-title">${escapeHtml(hypothesis.title)}</h3>
           </div>
-          <span class="pill">${escapeHtml(hypothesis.confidence)} · ${formatNum(totalEvidence.length)} 条证据</span>
         </div>
         <div class="hypothesis-grid">
           <div class="fact"><div class="fact-label">谁</div><div class="fact-value">${escapeHtml(hypothesis.who)}</div></div>
           <div class="fact"><div class="fact-label">什么场景</div><div class="fact-value">${escapeHtml(hypothesis.scene)}</div></div>
           <div class="fact"><div class="fact-label">遇到什么问题</div><div class="fact-value">${escapeHtml(hypothesis.problem)}</div></div>
           <div class="fact"><div class="fact-label">目前使用什么办法</div><div class="fact-value">${escapeHtml(hypothesis.current)}</div></div>
-          <div class="fact"><div class="fact-label">现有解法失效点</div><div class="fact-value">${escapeHtml(hypothesis.failure)}</div></div>
-          <div class="fact"><div class="fact-label">现有证据</div><div class="fact-value">${escapeHtml(hypothesis.evidence)}</div></div>
+          <div class="fact"><div class="fact-label">现有供给</div><div class="fact-value">${escapeHtml(hypothesis.supply)}</div></div>
+          <div class="fact"><div class="fact-label">供给缺口</div><div class="fact-value">${escapeHtml(hypothesis.supplyGap)}</div></div>
         </div>
-        <div class="detail-grid">
-          <section class="section">
-            <h2>现有供给与缺口</h2>
-            <p>${escapeHtml(hypothesis.supplyGap)}</p>
-          </section>
-          <section class="section">
-            <h2>还缺什么验证</h2>
-            <ul class="list">${hypothesis.validation.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-          </section>
-        </div>
+        <section class="section">
+          <h2>还缺什么验证</h2>
+          <ul class="list">${hypothesis.validation.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </section>
       </section>`;
     }
 
@@ -1284,11 +1277,9 @@
       const scene = genericSummary
         ? specificSceneFromEvidence(snippets, categories)
         : subNeed.summary || `围绕「${title}」出现求助、吐槽、询价或经验交流时`;
-      const failure = card.existing_solution_failure || "现有评论暂未稳定体现解法失效点，需要结合更多评论或访谈补足。";
       const contentSignals = counts?.content || 0;
       const productSignals = counts?.product || 0;
       const resourceSignals = counts?.resource || 0;
-      const confidence = evidenceCount >= 20 ? "证据较充分" : evidenceCount >= 6 ? "证据中等" : "证据偏少";
       const current = resourceSignals > Math.max(contentSignals, productSignals)
         ? "评论中较多表现为求资料、求链接或求现成方法，当前办法更像是继续找资源。"
         : productSignals > 0
@@ -1297,20 +1288,21 @@
       const supplyGap = productSignals > 0
         ? "已出现产品/工具强诉求，可优先核验是否有成熟工具、专项练习、自动批改或陪跑服务满足；当前页面不把供给缺口视为已验证结论。"
         : "当前评论更适合先作为内容选题或访谈线索；是否存在可产品化缺口，需要补做供给扫描和家长访谈。";
+      const supply = productSignals > 0 || (counts?.productWeak || 0) > 0
+        ? "评论中已出现工具、资料、练习册、课程、学习硬件或 App 等供给线索；具体品牌和效果需另做供给扫描。"
+        : "评论原文暂未稳定指向明确供给；可先把该点作为内容/访谈线索。";
       const validation = [
         "这些评论是否来自真实目标家长，以及是否能跨帖子、跨平台复现。",
         productSignals > 0 ? "家长愿意为工具/资料/服务中的哪一类付费，现有产品为什么没有满足。" : "该痛点更适合内容、服务还是工具化解决，是否有明确付费或持续使用意愿。",
-        evidenceCount < 6 ? "当前证据偏少，需追加采样或访谈后再判断是否进入机会池。" : "高频子问题是否能收敛为明确任务、触发场景和可衡量结果。"
+        evidenceCount < 6 ? "当前样本量不足，需追加采样或访谈后再判断是否进入机会池。" : "高频子问题是否能收敛为明确任务、触发场景和可衡量结果。"
       ];
       return {
         title,
-        confidence,
         who: AGE_MODE ? "当前所选年龄段家长" : "小学一年级家长中命中该子需求点的人群",
         scene,
         problem,
         current,
-        failure,
-        evidence: `全部 ${formatNum(evidenceCount)} 条；内容强信号 ${formatNum(contentSignals)} 条，产品强诉求 ${formatNum(productSignals)} 条，产品弱信号 ${formatNum(counts?.productWeak || 0)} 条，资料噪声 ${formatNum(resourceSignals)} 条。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`,
+        supply,
         supplyGap,
         validation
       };
@@ -1350,7 +1342,7 @@
 
     function specificProblemFromEvidence(evidenceCount, snippets, categories) {
       if (evidenceCount <= 3) {
-        return `现有证据偏少，暂不能稳定归纳为单一具体问题；需先复核这些评论是否真的同属该子需求。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
+        return `样本偏少，暂不能稳定归纳为单一具体问题；需先复核这些评论是否真的同属该子需求。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
       }
       const categoryText = categories.length ? categories.join("、") : "该子需求";
       return `${categoryText}相关问题仍需继续拆细；当前先以评论原文校准具体卡点。${snippets.length ? `代表原文：“${snippets.join("”“")}”。` : ""}`;
@@ -1366,15 +1358,6 @@
       };
     }
 
-    function renderInsightCard(subNeed) {
-      const card = subNeed.insight_card || {};
-      return `<div class="insight-card">
-        <div class="insight-item"><div class="insight-label">核心痛点总结</div><div class="insight-value">${escapeHtml(card.core_pain_summary || subNeed.summary || subNeed.name)}</div></div>
-        <div class="insight-item"><div class="insight-label">情绪/冲突烈度</div><div class="insight-value">${escapeHtml(card.emotional_conflict_intensity || "待继续观察")}</div></div>
-        <div class="insight-item"><div class="insight-label">现有解法失效点</div><div class="insight-value">${escapeHtml(card.existing_solution_failure || "现有评论暂未稳定体现解法失效点。")}</div></div>
-      </div>`;
-    }
-
     function renderMindFunnel(subNeed, totalEvidence, evidence, scope, limitKey, evidenceLimit, visibleEvidence, counts) {
       const baseGroups = subNeed.mind_funnel || [];
       const groups = baseGroups.map(group => {
@@ -1387,7 +1370,7 @@
         return `<div><div class="cluster-panel-title"><div><div class="cluster-name">${escapeHtml(scopeTitle)}</div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceScopeActions(limitKey, scope, counts)}${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div>${visibleEvidence.map(renderEvidence).join("") || `<div class="empty">${escapeHtml(EVIDENCE_SCOPE_META[scope]?.empty || "暂无评论证据。")}</div>`}</div>`;
       }
       let remaining = evidenceLimit;
-      return `<div class="cluster-panel-title"><div><div class="cluster-name">家长心智漏斗 · ${escapeHtml(scopeTitle)}</div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceScopeActions(limitKey, scope, counts)}${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div><div class="funnel-list">${groups.map(group => {
+      return `<div class="cluster-panel-title"><div><div class="cluster-name">评论证据 · ${escapeHtml(scopeTitle)}</div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceScopeActions(limitKey, scope, counts)}${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div><div class="funnel-list">${groups.map(group => {
         const take = Math.max(0, Math.min(group.all_evidence.length, remaining));
         remaining -= take;
         const rows = group.all_evidence.slice(0, take);
