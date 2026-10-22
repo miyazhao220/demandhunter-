@@ -511,6 +511,12 @@
     }
 
     .small-button:hover { background: var(--surface-soft); }
+    .small-button.copied { color: var(--accent-strong); border-color: var(--accent); }
+
+    .copy-status {
+      color: var(--muted);
+      font-size: 12px;
+    }
 
     .evidence {
       border: 1px solid var(--line);
@@ -718,17 +724,9 @@
     let openClusterIds = {};
     let openSubNeedIds = {};
     let selectedAudience = "all";
-    let evidenceScopes = {};
     let openAux = {};
     let pendingScrollTarget = "";
-
-    const EVIDENCE_SCOPE_META = {
-      all: { label: "全部证据", empty: "该子需求点暂无评论证据。" },
-      content: { label: "内容强信号", empty: "暂无强情绪/观点冲突型内容证据。" },
-      product: { label: "产品强诉求", empty: "暂无明确求工具/自动批改/专项练习册等产品强诉求。" },
-      productWeak: { label: "产品弱信号", empty: "暂无产品、工具、课程或供给提及。" },
-      resource: { label: "资料噪声", empty: "暂无纯求资料/链接类评论。" }
-    };
+    let copyStatusId = "";
 
     function safeURL(value) {
       if (typeof value !== "string" || !/^https?:\/\//i.test(value) || /[\u0000-\u0020\\]/u.test(value)) return "";
@@ -776,16 +774,6 @@
 
     function matchesResourceNoise(comment) {
       return Boolean(comment.intent_profile?.resource_noise);
-    }
-
-    function evidenceForScope(rows, scope) {
-      const evidence = dedupeEvidence(rows || []);
-      if (AGE_MODE || scope === "all") return evidence;
-      if (scope === "content") return evidence.filter(matchesContentSignal);
-      if (scope === "product") return evidence.filter(matchesProductStrongSignal);
-      if (scope === "productWeak") return evidence.filter(matchesProductWeakSignal);
-      if (scope === "resource") return evidence.filter(matchesResourceNoise);
-      return evidence;
     }
 
     function initAgeMode() {
@@ -895,6 +883,10 @@
         "'": "&#39;",
         "\"": "&quot;"
       }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/\n/g, "&#10;");
     }
 
     function formatNum(value) {
@@ -1042,6 +1034,12 @@
           render();
         });
       });
+      app.querySelectorAll("[data-copy-summary]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          copySummary(button.dataset.copySummary || "", button.dataset.copyId || "");
+        });
+      });
       app.querySelectorAll("[data-evidence-action]").forEach(button => {
         button.addEventListener("click", event => {
           event.stopPropagation();
@@ -1052,16 +1050,6 @@
           if (action === "more") evidenceLimits[id] = Math.min(total, current + EVIDENCE_PAGE_SIZE);
           if (action === "all") evidenceLimits[id] = total;
           if (action === "less") evidenceLimits[id] = INITIAL_EVIDENCE_LIMIT;
-          render();
-        });
-      });
-      app.querySelectorAll("[data-evidence-scope]").forEach(button => {
-        button.addEventListener("click", event => {
-          event.stopPropagation();
-          const id = button.dataset.id;
-          const scope = button.dataset.evidenceScope;
-          evidenceScopes[id] = scope;
-          evidenceLimits[id] = INITIAL_EVIDENCE_LIMIT;
           render();
         });
       });
@@ -1286,8 +1274,7 @@
       if (!totalEvidence.length) return "";
       const isOpen = openSubNeedIds[clusterKey] === subNeed.sub_need_id;
       const limitKey = subNeedLimitKey(clusterKey, subNeed.sub_need_id);
-      const scope = evidenceScopes[limitKey] || "all";
-      const evidence = evidenceForScope(totalEvidence, scope);
+      const evidence = totalEvidence;
       const evidenceLimit = Math.min(evidence.length, evidenceLimits[limitKey] || INITIAL_EVIDENCE_LIMIT);
       const visibleEvidence = evidence.slice(0, evidenceLimit);
       const counts = signalCounts(totalEvidence);
@@ -1298,18 +1285,24 @@
             <span class="cluster-count">${formatNum(totalEvidence.length)} 条</span>
             <span class="toggle-mark">${isOpen ? "−" : "+"}</span>
           </button>
-          ${isOpen ? `<div class="cluster-panel">${renderOpportunityHypothesisCard(opp, subNeed, totalEvidence, counts)}${renderMindFunnel(subNeed, totalEvidence, evidence, scope, limitKey, evidenceLimit, visibleEvidence, counts)}</div>` : ""}
+          ${isOpen ? `<div class="cluster-panel">${renderOpportunityHypothesisCard(opp, subNeed, totalEvidence, counts)}${renderMindFunnel(subNeed, totalEvidence, evidence, limitKey, evidenceLimit, visibleEvidence)}</div>` : ""}
         </div>
       `;
     }
 
     function renderOpportunityHypothesisCard(opp, subNeed, totalEvidence, counts) {
       const hypothesis = buildSubNeedOpportunityHypothesis(opp, subNeed, totalEvidence, counts);
+      const copyId = `${opp.id}::${subNeed.sub_need_id}`;
+      const copyText = buildOpportunityCopyText(opp, subNeed, hypothesis, totalEvidence);
       return `<section class="hypothesis-card">
         <div class="hypothesis-head">
           <div>
             <div class="eyebrow">机会假设卡片</div>
             <h3 class="hypothesis-title">${escapeHtml(hypothesis.title)}</h3>
+          </div>
+          <div class="evidence-actions">
+            <button class="small-button ${copyStatusId === copyId ? "copied" : ""}" type="button" data-copy-id="${escapeHtml(copyId)}" data-copy-summary="${escapeAttr(copyText)}">${copyStatusId === copyId ? "已复制" : "复制摘要"}</button>
+            ${copyStatusId === copyId ? `<span class="copy-status">可直接发给同事讨论</span>` : ""}
           </div>
         </div>
         <div class="hypothesis-grid">
@@ -1325,6 +1318,83 @@
           <ul class="list">${hypothesis.validation.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
         </section>
       </section>`;
+    }
+
+    function buildOpportunityCopyText(opp, subNeed, hypothesis, totalEvidence) {
+      const lines = [
+        `机会雷达 Alpha / ${opp.title || "小学一年级家长"}`,
+        `子需求：${hypothesis.title}`,
+        `证据评论：${formatNum(totalEvidence.length)} 条`,
+        `谁：${hypothesis.who}`,
+        `什么场景：${hypothesis.scene}`,
+        `遇到什么问题：${hypothesis.problem}`,
+        `目前使用什么办法：${hypothesis.current}`,
+        `现有供给：${plainSupplySummary(hypothesis.supply)}`,
+        `供给缺口：${hypothesis.supplyGap}`,
+        `还缺什么验证：${hypothesis.validation.join("；")}`,
+        `链接：${currentShareUrl(opp.id, findClusterIdForSubNeed(opp, subNeed.sub_need_id), subNeed.sub_need_id)}`
+      ];
+      return lines.filter(Boolean).join("\n");
+    }
+
+    function plainSupplySummary(supply) {
+      const rows = [];
+      if (supply.mentioned?.length) rows.push(`评论/相关原帖已出现：${supply.mentioned.join("、")}`);
+      if (supply.publicCandidates?.length) rows.push(`公开供给候选：${supply.publicCandidates.join("；")}`);
+      if (supply.note) rows.push(supply.note);
+      return rows.join("；") || "待补充公开供给扫描。";
+    }
+
+    function findClusterIdForSubNeed(opp, subNeedId) {
+      for (const cluster of findClusters(opp)) {
+        if ((cluster.sub_need_points || []).some(item => item.sub_need_id === subNeedId)) return cluster.cluster_id;
+      }
+      return "";
+    }
+
+    function currentShareUrl(opportunityId, clusterId, subNeedId) {
+      if (typeof window === "undefined" || !window.location) return "";
+      const url = new URL(window.location.href);
+      const params = new URLSearchParams();
+      params.set("opp", opportunityId);
+      if (clusterId) params.set("cluster", clusterId);
+      if (subNeedId) params.set("sub", subNeedId);
+      url.hash = params.toString();
+      return url.href;
+    }
+
+    function copySummary(text, copyId) {
+      const markCopied = () => {
+        copyStatusId = copyId;
+        render();
+        if (typeof window !== "undefined" && typeof window.setTimeout === "function") {
+          window.setTimeout(() => {
+            if (copyStatusId === copyId) {
+              copyStatusId = "";
+              render();
+            }
+          }, 1800);
+        }
+      };
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(markCopied).catch(() => fallbackCopy(text, markCopied));
+      } else {
+        fallbackCopy(text, markCopied);
+      }
+    }
+
+    function fallbackCopy(text, callback) {
+      if (typeof document === "undefined") return;
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try { document.execCommand("copy"); } catch {}
+      document.body.removeChild(textarea);
+      callback();
     }
 
     function buildSubNeedOpportunityHypothesis(opp, subNeed, totalEvidence, counts) {
@@ -1526,27 +1596,9 @@
       };
     }
 
-    function renderMindFunnel(subNeed, totalEvidence, evidence, scope, limitKey, evidenceLimit, visibleEvidence, counts) {
-      const baseGroups = subNeed.mind_funnel || [];
-      const groups = baseGroups.map(group => {
-        const groupEvidence = filterEvidenceByIds(evidence, group.all_evidence || []);
-        return { ...group, all_evidence: groupEvidence, comment_count: groupEvidence.length };
-      }).filter(group => group.comment_count > 0);
+    function renderMindFunnel(subNeed, totalEvidence, evidence, limitKey, evidenceLimit, visibleEvidence) {
       const scopeMeta = `${formatNum(visibleEvidence.length)} / ${formatNum(evidence.length)} 条 · 全部 ${formatNum(totalEvidence.length)} 条`;
       return `<div><div class="cluster-panel-title"><div><div class="cluster-count">${escapeHtml(scopeMeta)}</div></div>${renderEvidenceActions(limitKey, evidenceLimit, evidence.length)}</div>${visibleEvidence.map(renderEvidence).join("") || `<div class="empty">暂无评论证据。</div>`}</div>`;
-    }
-
-    function renderEvidenceScopeActions(id, scope, counts) {
-      if (AGE_MODE) return "";
-      const escapedId = escapeHtml(id);
-      const buttons = [
-        ["all", "全部", counts.all],
-        ["content", "内容强", counts.content],
-        ["product", "产品强", counts.product],
-        ["productWeak", "产品弱", counts.productWeak],
-        ["resource", "资料噪声", counts.resource]
-      ];
-      return `<div class="evidence-actions">${buttons.map(([key, label, count]) => `<button class="small-button" type="button" data-evidence-scope="${key}" data-id="${escapedId}" ${scope === key ? "disabled" : ""}>${label} ${formatNum(count)}</button>`).join("")}</div>`;
     }
 
     function filterEvidenceByIds(visibleRows, candidateRows) {
