@@ -604,7 +604,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=013";
+    const LEGACY_DATA_URL = "grade1-data.json?v=014";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -1270,33 +1270,30 @@
       const title = subNeed.name || "未命名子需求点";
       const snippets = evidenceSnippets(totalEvidence, 2);
       const categories = evidenceCategories(totalEvidence, [title, subNeed.summary, card.core_pain_summary].join(" "));
+      const profile = demandProfile(opp, subNeed, totalEvidence, categories);
       const genericSummary = isGenericInsight(card.core_pain_summary) || isGenericInsight(subNeed.summary);
       const problem = genericSummary
-        ? specificProblemFromEvidence(evidenceCount, snippets, categories)
+        ? profile.problem || specificProblemFromEvidence(evidenceCount, snippets, categories)
         : card.core_pain_summary || subNeed.summary || title;
       const scene = genericSummary
-        ? specificSceneFromEvidence(snippets, categories)
+        ? profile.scene || specificSceneFromEvidence(snippets, categories)
         : subNeed.summary || `围绕「${title}」出现求助、吐槽、询价或经验交流时`;
       const contentSignals = counts?.content || 0;
       const productSignals = counts?.product || 0;
       const resourceSignals = counts?.resource || 0;
-      const current = resourceSignals > Math.max(contentSignals, productSignals)
+      const current = profile.current || (resourceSignals > Math.max(contentSignals, productSignals)
         ? "评论中较多表现为求资料、求链接或求现成方法，当前办法更像是继续找资源。"
         : productSignals > 0
           ? "评论中已出现求工具、求练习册、求自动化或求现成方案信号，但具体使用路径仍需验证。"
-          : "评论中主要呈现求助、观点和经验交流，当前办法多为问人、搜索内容、收藏攻略或自行陪练。";
+          : "评论中主要呈现求助、观点和经验交流，当前办法多为问人、搜索内容、收藏攻略或自行陪练。");
       const supplyGap = opp?.gap || (productSignals > 0
         ? "已出现产品/工具强诉求，可优先核验是否有成熟工具、专项练习、自动批改或陪跑服务满足；当前页面不把供给缺口视为已验证结论。"
         : "当前评论更适合先作为内容选题或访谈线索；是否存在可产品化缺口，需要补做供给扫描和家长访谈。");
       const supply = buildConcreteSupplySummary(opp, subNeed, totalEvidence);
-      const validation = [
-        "这些评论是否来自真实目标家长，以及是否能跨帖子、跨平台复现。",
-        productSignals > 0 ? "家长愿意为工具/资料/服务中的哪一类付费，现有产品为什么没有满足。" : "该痛点更适合内容、服务还是工具化解决，是否有明确付费或持续使用意愿。",
-        evidenceCount < 6 ? "当前样本量不足，需追加采样或访谈后再判断是否进入机会池。" : "高频子问题是否能收敛为明确任务、触发场景和可衡量结果。"
-      ];
+      const validation = profile.validation || validationForProfile(profile, productSignals, evidenceCount);
       return {
         title,
-        who: AGE_MODE ? "当前所选年龄段家长" : "小学一年级家长中命中该子需求点的人群",
+        who: AGE_MODE ? "当前所选年龄段家长" : profile.who,
         scene,
         problem,
         current,
@@ -1304,6 +1301,48 @@
         supplyGap,
         validation
       };
+    }
+
+    function demandProfile(opp, subNeed, rows, categories) {
+      const text = [opp?.title, subNeed.name, subNeed.summary, ...(rows || []).flatMap(row => [row.comment_text, row.parent_post_title, row.keyword])].filter(Boolean).join(" ");
+      const make = (key, who, scene, problem, current, validation) => ({ key, who, scene, problem, current, validation });
+      if (/资料|电子版|课件|试卷|练习册|清单|链接/u.test([subNeed.name, subNeed.summary].filter(Boolean).join(" "))) {
+        return make("resource-material", "正在给孩子补练习材料或找可直接照着做内容的一年级家长", "孩子在某个学习任务上卡住，或者学校任务变多后，家长开始找试卷、电子版、课件、清单、讲解和打印材料。", "家长缺的往往不是一条建议，而是能马上用、难度适配、知道怎么讲和怎么练的材料组合。", "在小红书、抖音、家长群和老师账号里找资料，评论区求电子版、链接、清单或打印材料，再自己筛选和拼接。", ["资料需求背后对应的是哪个具体学习卡点，不能只停留在求资料。", "家长愿意为整理好的资料、分层练习、讲解脚本还是持续陪练付费。", "现有资料为什么不够用：难度不适配、不会讲、缺诊断，还是缺复习计划。"]);
+      }
+      if (/学习桌|护眼灯|台灯|大路灯|学习机|学习平板|打印机|词典笔|硬件|工具/u.test(text)) {
+        return make("tool-choice", "准备购买或已经在比较学习硬件/学习工具的一年级家长", "孩子写作业、阅读、练习或护眼需求出现后，家长开始比较学习桌、护眼灯、学习机、App、打印机等工具。", "家长不是单纯想买东西，而是不确定哪个工具真的适合自家孩子、能否减少陪学负担、会不会买贵或闲置。", "看测评、问链接、比价格和型号，参考其他家长体验，也会在评论区直接问品牌、尺寸、效果和购买渠道。", ["哪些工具是刚需，哪些只是营销种草带来的购买焦虑。", "家长最终决策更看重效果、价格、品牌、护眼/安全，还是能否减少陪学时间。", "已有工具买回家后的真实使用频次、闲置原因和替代方案。"]);
+      }
+      if (/拼音|识字|认字|生字|阅读|读题|精读|口算|数学|应用题|英语|单词/u.test(text)) {
+        return make("learning-foundation", "发现孩子在基础学习任务上卡住的一年级家长", "做作业、读题、拼音听写、识字阅读、口算或英语启蒙时，家长发现孩子慢、错、不会或换个题型就卡住。", "家长能看到孩子不会，但难判断是知识点没掌握、练习不足、方法不对，还是当前阶段正常波动。", "找资料和练习册，收藏老师讲解视频，使用拼音/识字/口算 App 或学习机，必要时问老师、报课或自己陪练。", ["卡点到底集中在拼音、识字、读题、计算还是英语启蒙，是否需要继续拆到更小任务。", "家长愿意为诊断、练习内容、自动批改、讲解还是陪跑服务付费。", "现有 App/练习册/学习机是否能解决迁移和复盘问题，而不只是增加练习量。"]);
+      }
+      if (/作业|拖拉|磨蹭|坐不住|姿势|订正|听写|默写|打卡|书包|文具|习惯|执行/u.test(text)) {
+        return make("homework-execution", "每天要陪作业、管习惯的一年级家长", "放学后到睡前，作业、订正、听写、阅读打卡、整理书包等任务集中发生。", "问题不只是孩子不会，而是任务推进困难：拖拉、坐不住、姿势散、反复催促，最后变成亲子冲突和家长消耗。", "家长盯着写、设时间表和奖惩、买计时器或任务表，也可能送托管、问其他家长流程。", ["家长最想降低的是作业时长、冲突次数、提醒次数，还是自己的陪伴时间。", "孩子能否自己执行任务，还是必须依赖家长或托管老师。", "工具应优先解决任务拆解、过程提醒、情绪降温还是复盘反馈。"]);
+      }
+      if (/老师|家校|学校|批评|点名|私聊|校园|欺负|安全|表达|生活老师/u.test(text)) {
+        return make("school-communication", "担心学校反馈、老师沟通和孩子在校状态的一年级家长", "老师私聊、家长群信息、孩子回家情绪异常、同伴冲突或校园安全疑虑出现时。", "家长既怕反应过度影响师生关系，又怕不追问会错过孩子真实处境；孩子表达能力有限时尤其难判断。", "私聊老师、问其他家长、看经验帖、记录事件，必要时找学校或专业人士沟通。", ["哪些情况只是普通适应问题，哪些需要升级沟通或外部介入。", "家长是否需要沟通话术、事件记录、严重程度判断，还是情绪支持。", "这类工具如何保护隐私，并避免把家校关系推向对立。"]);
+      }
+      if (/专注|注意力|走神|ADHD|感统|干预|检测|坐不住/u.test(text)) {
+        return make("attention-intervention", "收到老师反馈或长期陪学受挫、担心专注力问题的一年级家长", "上课走神、作业无法持续、训练很多遍仍没有明显改善时。", "家长不知道这是习惯问题、能力问题、情绪问题，还是需要专业评估的注意力/发展问题。", "搜索训练方法，咨询老师或医生，尝试测评、感统/专注力课程、家庭训练清单。", ["哪些评论只是学习习惯问题，哪些已经接近专业评估场景。", "家长是否接受边界清晰的轻量筛查和分流建议。", "家庭训练能否持续执行，并被老师反馈或作业表现验证。"]);
+      }
+      if (/托管|晚托|晚辅导|课后服务|接送|看管|双职工|一对一|机构/u.test(text)) {
+        return make("after-school-care", "放学后接送、看管或作业辅导资源不足的一年级家庭", "放学早、父母下班晚、老人无法稳定辅导，作业和接送需要外部服务兜底。", "家长需要托管解决时间问题，但又担心只完成作业、不保证学会，也担心安全、老师质量和孩子体验。", "比较校内课后服务、社区托管、晚辅导班、一对一和亲友接送，主要靠距离、价格和口碑试错。", ["家长选择托管时最看重安全、完成作业、学会程度、距离还是价格。", "托管服务的真实反馈是否足够透明，家长愿不愿意为质量记录付费。", "该机会更像信息比较、服务撮合，还是机构端反馈工具。"]);
+      }
+      if (/兴趣班|书法|跳绳|运动|美术|音乐|口才|特长|试听|报班|退费/u.test(text)) {
+        return make("interest-class", "在兴趣班和综合素养上做取舍的一年级家长", "校内要求、同伴比较、孩子兴趣和家庭时间预算同时出现时。", "家长不知道该报什么、报几个、坚持多久，也担心孩子负担过重或钱花了没效果。", "看经验帖、约试听、问价格和退费，参考同龄家庭配置，再根据接送和孩子反馈调整。", ["兴趣班决策中家长最在意升学、身体素质、兴趣探索还是社交比较。", "不同城市和家庭预算下，是否存在可复用的取舍框架。", "供给缺口是测评推荐、试听管理、时间规划，还是机构口碑透明度。"]);
+      }
+      if (/幼小衔接|入学|适应|开学|作息|午睡|吃饭|座位|早睡|超前|准备/u.test(text)) {
+        return make("school-transition", "处在幼小衔接和入学适应期的一年级家庭", "开学前后，作息、学习任务、户外运动、早睡和学校生活安排被重新组合。", "家长不知道该提前准备到什么程度、入学后哪些不适应正常，哪些需要马上干预。", "看入学清单、时间表和经验帖，提前练拼音识字数学，向老师和同龄家长确认节奏。", ["家长真正需要的是准备清单、时间规划、适应问题判断，还是持续陪跑。", "哪些家庭变量最影响方案，例如双职工、老人带娃、学校作业量。", "是否能形成开学前后 30-60 天的低负担陪跑产品。"]);
+      }
+      return make("general", "小学一年级家长中命中该具体需求的人群", "围绕该需求出现求助、比较、询价或经验交流时。", "家长已经表达了具体困惑，但还需要结合评论原文继续校准真实任务和触发场景。", "主要通过搜索内容、问老师/家长群、收藏攻略、试用工具或购买服务来解决。", null);
+    }
+
+    function validationForProfile(profile, productSignals, evidenceCount) {
+      if (profile.validation) return profile.validation;
+      return [
+        "这些评论是否来自真实目标家长，以及是否能跨帖子、跨平台复现。",
+        productSignals > 0 ? "家长愿意为工具、资料或服务中的哪一类付费，现有产品为什么没有满足。" : "该痛点更适合内容、服务还是工具化解决，是否有明确付费或持续使用意愿。",
+        evidenceCount < 6 ? "当前样本量不足，需追加采样或访谈后再判断是否进入机会池。" : "高频子问题是否能收敛为明确任务、触发场景和可衡量结果。"
+      ];
     }
 
     function renderSupplySummary(supply) {
