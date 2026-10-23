@@ -1,0 +1,716 @@
+{
+  "version": "grade1-semantic-v1-20261023",
+  "run_id": "RUN-20261023-grade1-semantic-v1",
+  "input_hash": "33cb7e3908bb945f04ae694c7e100a2993c34d63b6c49e1e3500acfb0e22f9f4",
+  "count": 3821,
+  "batch_size": 32,
+  "batch_count": 120,
+  "statuses": {
+    "primary": 548,
+    "intercept": 1445,
+    "background": 679,
+    "out_of_scope": 257,
+    "unmatched": 707,
+    "indirect": 185
+  },
+  "recovered_to_primary": 261,
+  "removed_from_primary": 690,
+  "audited_count": 2403,
+  "rule": "逐条模型语义判定，主证据复核，逐簇语义分组；无关键词分类回退。",
+  "reconciliation": {
+    "theme_evidence_total": 548,
+    "cluster_evidence_total": 548,
+    "platform_evidence_total": 548,
+    "platform_evidence_counts": {
+      "抖音": 321,
+      "小红书": 227
+    },
+    "totals_consistent": true,
+    "raw_comment_count": 3821,
+    "accounted_comment_count": 3821,
+    "accounted_matches_raw": true
+  },
+  "comparison": [
+    {
+      "theme_id": "T01",
+      "concern_name": "学习基础与学科焦虑",
+      "old_count": 132,
+      "new_count": 126,
+      "delta": -6,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T01-C2",
+          "name": "要可直接使用的试卷、资料、讲解和练习",
+          "old_count": 36,
+          "new_count": 68,
+          "delta": 32
+        },
+        {
+          "cluster_id": "T01-C3",
+          "name": "拼音、识字、读题和数学基础卡住",
+          "old_count": 48,
+          "new_count": 29,
+          "delta": -19
+        },
+        {
+          "cluster_id": "T01-C5",
+          "name": "阅读、英语和长期学习习惯要早点抓",
+          "old_count": 13,
+          "new_count": 17,
+          "delta": 4
+        },
+        {
+          "cluster_id": "T01-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 27,
+          "new_count": 9,
+          "delta": -18
+        },
+        {
+          "cluster_id": "T01-C1",
+          "name": "想知道学科学到什么程度算正常",
+          "old_count": 7,
+          "new_count": 2,
+          "delta": -5
+        },
+        {
+          "cluster_id": "T01-C4",
+          "name": "希望早一点打基础，避免后面掉队",
+          "old_count": 1,
+          "new_count": 1,
+          "delta": 0
+        }
+      ]
+    },
+    {
+      "theme_id": "T12",
+      "concern_name": "学习空间、硬件和工具选择",
+      "old_count": 192,
+      "new_count": 116,
+      "delta": -76,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T12-C3",
+          "name": "学习桌椅、书柜和护眼灯的空间/尺寸/链接决策",
+          "old_count": 99,
+          "new_count": 41,
+          "delta": -58
+        },
+        {
+          "cluster_id": "T12-C4",
+          "name": "学习软件/App/学习机选择和资料获取",
+          "old_count": 70,
+          "new_count": 38,
+          "delta": -32
+        },
+        {
+          "cluster_id": "T12-C1",
+          "name": "想知道工具是否好用、贵不贵、值不值",
+          "old_count": 23,
+          "new_count": 32,
+          "delta": 9
+        },
+        {
+          "cluster_id": "T12-C2",
+          "name": "希望工具让孩子更愿意学习、家长更省心",
+          "old_count": 0,
+          "new_count": 3,
+          "delta": 3
+        },
+        {
+          "cluster_id": "T12-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 0,
+          "new_count": 2,
+          "delta": 2
+        }
+      ]
+    },
+    {
+      "theme_id": "T09",
+      "concern_name": "升学择校、掐尖与学位焦虑",
+      "old_count": 17,
+      "new_count": 63,
+      "delta": 46,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T09-C4",
+          "name": "入学报名、资料核验和学校选择流程不透明",
+          "old_count": 7,
+          "new_count": 40,
+          "delta": 33
+        },
+        {
+          "cluster_id": "T09-C1",
+          "name": "择校信息复杂，家长不知道从哪里入手",
+          "old_count": 3,
+          "new_count": 16,
+          "delta": 13
+        },
+        {
+          "cluster_id": "T09-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 4,
+          "new_count": 7,
+          "delta": 3
+        },
+        {
+          "cluster_id": "T09-C2",
+          "name": "担心政策和名额变化影响孩子机会",
+          "old_count": 3,
+          "new_count": 0,
+          "delta": -3
+        }
+      ]
+    },
+    {
+      "theme_id": "T02",
+      "concern_name": "作业陪伴、拖拉与学习习惯",
+      "old_count": 138,
+      "new_count": 56,
+      "delta": -82,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T02-C1",
+          "name": "陪作业消耗家长情绪和夜间时间",
+          "old_count": 28,
+          "new_count": 19,
+          "delta": -9
+        },
+        {
+          "cluster_id": "T02-C3",
+          "name": "需要低冲突的作业推进方法",
+          "old_count": 10,
+          "new_count": 15,
+          "delta": 5
+        },
+        {
+          "cluster_id": "T02-C2",
+          "name": "孩子拖拉、姿势散、坐不住，习惯未成形",
+          "old_count": 38,
+          "new_count": 10,
+          "delta": -28
+        },
+        {
+          "cluster_id": "T02-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 39,
+          "new_count": 5,
+          "delta": -34
+        },
+        {
+          "cluster_id": "T02-C5",
+          "name": "作业打卡、听写默写和周末任务变多",
+          "old_count": 13,
+          "new_count": 4,
+          "delta": -9
+        },
+        {
+          "cluster_id": "T02-C4",
+          "name": "书包、文具和学校物品管理需要流程",
+          "old_count": 10,
+          "new_count": 3,
+          "delta": -7
+        }
+      ]
+    },
+    {
+      "theme_id": "T13",
+      "concern_name": "兴趣班与综合素养取舍",
+      "old_count": 105,
+      "new_count": 43,
+      "delta": -62,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T13-C4",
+          "name": "价格、试听和机构选择决策",
+          "old_count": 1,
+          "new_count": 19,
+          "delta": 18
+        },
+        {
+          "cluster_id": "T13-C1",
+          "name": "想知道兴趣班该报哪些、报几个",
+          "old_count": 58,
+          "new_count": 18,
+          "delta": -40
+        },
+        {
+          "cluster_id": "T13-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 18,
+          "new_count": 2,
+          "delta": -16
+        },
+        {
+          "cluster_id": "T13-C3",
+          "name": "希望培养长期能力、升学竞争力或身体素质",
+          "old_count": 2,
+          "new_count": 2,
+          "delta": 0
+        },
+        {
+          "cluster_id": "T13-C2",
+          "name": "时间、接送和孩子负担太重",
+          "old_count": 6,
+          "new_count": 2,
+          "delta": -4
+        },
+        {
+          "cluster_id": "T13-C5",
+          "name": "运动类和跳绳等校内能力要求",
+          "old_count": 20,
+          "new_count": 0,
+          "delta": -20
+        }
+      ]
+    },
+    {
+      "theme_id": "T03",
+      "concern_name": "入学适应、家庭节奏与家长焦虑",
+      "old_count": 93,
+      "new_count": 41,
+      "delta": -52,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T03-C2",
+          "name": "孩子刚入学不适应，家长担心但不知道该不该管",
+          "old_count": 33,
+          "new_count": 14,
+          "delta": -19
+        },
+        {
+          "cluster_id": "T03-C1",
+          "name": "放学后时间不够，作业、户外和早睡互相挤压",
+          "old_count": 17,
+          "new_count": 9,
+          "delta": -8
+        },
+        {
+          "cluster_id": "T03-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 30,
+          "new_count": 9,
+          "delta": -21
+        },
+        {
+          "cluster_id": "T03-C5",
+          "name": "学校午睡、座位、吃饭等生活安排触发担忧",
+          "old_count": 9,
+          "new_count": 6,
+          "delta": -3
+        },
+        {
+          "cluster_id": "T03-C4",
+          "name": "希望孩子能更省心、自主、家庭生活少被学校节奏吞没",
+          "old_count": 4,
+          "new_count": 2,
+          "delta": -2
+        },
+        {
+          "cluster_id": "T03-C3",
+          "name": "需要判断边界：哪些问题正常，哪些要介入",
+          "old_count": 0,
+          "new_count": 1,
+          "delta": 1
+        }
+      ]
+    },
+    {
+      "theme_id": "T06",
+      "concern_name": "家校沟通、老师反馈与校园安全",
+      "old_count": 121,
+      "new_count": 37,
+      "delta": -84,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T06-C3",
+          "name": "需要家校沟通和维权边界",
+          "old_count": 10,
+          "new_count": 9,
+          "delta": -1
+        },
+        {
+          "cluster_id": "T06-C5",
+          "name": "老师频繁找家长或生活老师配置引发担忧",
+          "old_count": 4,
+          "new_count": 9,
+          "delta": 5
+        },
+        {
+          "cluster_id": "T06-C1",
+          "name": "被老师私聊、点名或批评后家长焦虑",
+          "old_count": 57,
+          "new_count": 8,
+          "delta": -49
+        },
+        {
+          "cluster_id": "T06-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 48,
+          "new_count": 5,
+          "delta": -43
+        },
+        {
+          "cluster_id": "T06-C4",
+          "name": "需要翻译老师暗语和学校任务要求",
+          "old_count": 0,
+          "new_count": 4,
+          "delta": 4
+        },
+        {
+          "cluster_id": "T06-C2",
+          "name": "担心孩子在学校被不当对待且不会表达",
+          "old_count": 2,
+          "new_count": 2,
+          "delta": 0
+        }
+      ]
+    },
+    {
+      "theme_id": "T05",
+      "concern_name": "幼小衔接与超前学习边界",
+      "old_count": 48,
+      "new_count": 26,
+      "delta": -22,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T05-C1",
+          "name": "想知道入学前到底该准备到什么程度",
+          "old_count": 20,
+          "new_count": 11,
+          "delta": -9
+        },
+        {
+          "cluster_id": "T05-C3",
+          "name": "希望提前布局但不想把孩子和自己耗垮",
+          "old_count": 3,
+          "new_count": 8,
+          "delta": 5
+        },
+        {
+          "cluster_id": "T05-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 8,
+          "new_count": 4,
+          "delta": -4
+        },
+        {
+          "cluster_id": "T05-C2",
+          "name": "被平台案例刺激后更焦虑，不知道比较基准",
+          "old_count": 17,
+          "new_count": 3,
+          "delta": -14
+        }
+      ]
+    },
+    {
+      "theme_id": "T04",
+      "concern_name": "注意力、专注力与发展干预",
+      "old_count": 77,
+      "new_count": 20,
+      "delta": -57,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T04-C1",
+          "name": "老师反馈孩子上课走神，家长焦虑无助",
+          "old_count": 31,
+          "new_count": 9,
+          "delta": -22
+        },
+        {
+          "cluster_id": "T04-C2",
+          "name": "想判断是不是 ADHD 或是否需要专业检测",
+          "old_count": 17,
+          "new_count": 5,
+          "delta": -12
+        },
+        {
+          "cluster_id": "T04-C3",
+          "name": "需要家庭可执行的专注力训练方法",
+          "old_count": 5,
+          "new_count": 4,
+          "delta": -1
+        },
+        {
+          "cluster_id": "T04-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 18,
+          "new_count": 2,
+          "delta": -16
+        },
+        {
+          "cluster_id": "T04-C4",
+          "name": "期待越早干预越好、三个月看到变化",
+          "old_count": 6,
+          "new_count": 0,
+          "delta": -6
+        }
+      ]
+    },
+    {
+      "theme_id": "T07",
+      "concern_name": "课后托管、晚托与家庭照护",
+      "old_count": 40,
+      "new_count": 15,
+      "delta": -25,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T07-C2",
+          "name": "想判断托管、晚辅导、一对一该怎么选",
+          "old_count": 38,
+          "new_count": 9,
+          "delta": -29
+        },
+        {
+          "cluster_id": "T07-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 1,
+          "new_count": 5,
+          "delta": 4
+        },
+        {
+          "cluster_id": "T07-C1",
+          "name": "放学早与父母工作时间冲突",
+          "old_count": 1,
+          "new_count": 1,
+          "delta": 0
+        }
+      ]
+    },
+    {
+      "theme_id": "T11",
+      "concern_name": "健康发育、表达问题与心理压力",
+      "old_count": 1,
+      "new_count": 5,
+      "delta": 4,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T11-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 0,
+          "new_count": 5,
+          "delta": 5
+        },
+        {
+          "cluster_id": "T11-C1",
+          "name": "入学后表达问题被放大，家长担心长期影响",
+          "old_count": 1,
+          "new_count": 0,
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "theme_id": "T08",
+      "concern_name": "班级事务、家长群与隐性负担",
+      "old_count": 2,
+      "new_count": 0,
+      "delta": -2,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T08-C3",
+          "name": "需要边界感和可协商机制",
+          "old_count": 1,
+          "new_count": 0,
+          "delta": -1
+        },
+        {
+          "cluster_id": "T08-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 1,
+          "new_count": 0,
+          "delta": -1
+        }
+      ]
+    },
+    {
+      "theme_id": "T10",
+      "concern_name": "电子产品、网络内容与行为规范",
+      "old_count": 11,
+      "new_count": 0,
+      "delta": -11,
+      "reason": "全量评论语义重判、复核人群与真实诉求；不沿用关键词首命中。",
+      "clusters": [
+        {
+          "cluster_id": "T10-C1",
+          "name": "孩子从网络或同伴学到不良语言行为",
+          "old_count": 9,
+          "new_count": 0,
+          "delta": -9
+        },
+        {
+          "cluster_id": "T10-UNCLASSIFIED",
+          "name": "未归类",
+          "old_count": 2,
+          "new_count": 0,
+          "delta": -2
+        }
+      ]
+    }
+  ],
+  "recovered_sample": [
+    {
+      "id": "G1-b95862f20a748d96",
+      "text": "我已经要疯啦，纸上第一声，娃儿读234声都有[流泪][流泪]，谁来救救我[流泪]",
+      "reason": "以“娃儿”体现家长身份，具体描述声调辨读卡点并直接发出求助，属于拼音基础困难。"
+    },
+    {
+      "id": "G1-ff834812f87d9907",
+      "text": "这么多内容，时间咋安排的过来",
+      "reason": "评论质疑大量衔接内容在有限时间内难以完成，体现想提前准备又担心安排不过来的负担。"
+    },
+    {
+      "id": "G1-c0198854fe8ee5d7",
+      "text": "现在还是沿江小学最厉害吗",
+      "reason": "在一年级报名场景中比较特定学校实力，具有明确的择校信息需求。"
+    },
+    {
+      "id": "G1-4c3121f50b3da84d",
+      "text": "求电子版",
+      "reason": "昵称明确表明宝妈身份，结合一年级语文资料原帖，是直接索取对应电子版的家长需求。"
+    },
+    {
+      "id": "G1-2902fedac2b66227",
+      "text": "不都是手机报名了吗？",
+      "reason": "在明确的一年级现场报名语境中追问是否应使用手机办理，属于报名流程咨询。"
+    },
+    {
+      "id": "G1-6ae3d71db5cc7530",
+      "text": "已关注求电子挡",
+      "reason": "评论明确关注并索取电子档，原帖补足资料为一年级语文重点知识汇总，需求清楚。"
+    },
+    {
+      "id": "G1-9b3167a7ebf8213b",
+      "text": "老师来了，我想问什么问题呀？",
+      "reason": "“老师来了”呈现正在面临家访的情境，并直接询问应该问什么，属于具体沟通求助。"
+    },
+    {
+      "id": "G1-fd26cc9e49f145f3",
+      "text": "需要电子",
+      "reason": "结合原帖可知所需为一年级语文汇总电子资料，普通个人账号明确表示需要，诉求具体。"
+    },
+    {
+      "id": "G1-15e42462c9dba7ea",
+      "text": "这个灯光刺眼吗？",
+      "reason": "幼升小家庭语境下直接询问灯光舒适度，属于学习照明产品购买前的性能判断。"
+    },
+    {
+      "id": "G1-259dbcbfddd25f92",
+      "text": "我是不是买错了应该直接入手五星学霸而不是实验班[捂脸][捂脸]",
+      "reason": "“买错了”表明已作教辅购买，当前具体比较实验班与五星学霸，属于练习资料选择咨询。"
+    },
+    {
+      "id": "G1-37343887e9895551",
+      "text": "电子版",
+      "reason": "评论虽短，但原帖明确了电子版资料对象，普通个人账号可合理视为相关家长消费者。"
+    },
+    {
+      "id": "G1-46e37c2990ff1455",
+      "text": "好用告诉我一下，我也买一个",
+      "reason": "承接一年级学习机试用内容，明确索要好用与否的后续反馈，并表达购买同款的意向。"
+    },
+    {
+      "id": "G1-49b89030900e562f",
+      "text": "电子版",
+      "reason": "原帖明确提供一年级语文知识汇总，普通个人账号以省略表达索取电子版，需求对象清楚。"
+    },
+    {
+      "id": "G1-57c28dcfd8245288",
+      "text": "求电子版",
+      "reason": "原帖明确幼升小高频字对象，普通个人账号直接索要电子版，属于具体资料需求。"
+    },
+    {
+      "id": "G1-9a2798f2053fd190",
+      "text": "桌子和椅子超级需要",
+      "reason": "评论明确表示非常需要桌椅，结合一年级学习区语境，是具体学习家具需求。"
+    },
+    {
+      "id": "G1-9c3e30cab0314ba9",
+      "text": "求电子版",
+      "reason": "短评未复述资料名称，但原帖已明确是一年级拼音练习，资源对象可以确定。"
+    },
+    {
+      "id": "G1-aea7a31af48bf4ec",
+      "text": "选了哪个小学呀？",
+      "reason": "在香港小一面试家长分享帖下追问所选小学，属于具体择校信息搜集。"
+    },
+    {
+      "id": "G1-c62196badb63a9f4",
+      "text": "您觉得北中集团初中部哪些分校是比较好的",
+      "reason": "结合幼升小择校语境，评论询问集团内初中分校优劣，是后续升学规划咨询。"
+    },
+    {
+      "id": "G1-cab495d9c31b3377",
+      "text": "不是网上报名吗",
+      "reason": "结合新生报名现场语境，评论者对报名渠道提出明确疑问，属于流程确认需求。"
+    },
+    {
+      "id": "G1-d4ac786a5a54a2d3",
+      "text": "求电子版[笑哭R]",
+      "reason": "评论直接索取电子版，结合原帖可确定是一年级拼音练习，笑哭表情不改变语义。"
+    },
+    {
+      "id": "G1-e45a02c60b377046",
+      "text": "求资料",
+      "reason": "原帖明确是一年级语文重点资料，普通个人账号直接索取，可合理判断为相关家长需求。"
+    },
+    {
+      "id": "G1-e98c0a35bd1d61f2",
+      "text": "练字可以用线上简小知吗？有人学过吗",
+      "reason": "在幼升小兴趣班取舍语境中，具体询问线上练字产品及他人使用经验。"
+    },
+    {
+      "id": "G1-fcf43dba5d79441a",
+      "text": "具体可以分享一下细则文档吗",
+      "reason": "明确请求分享细则文档，原帖补足文档对象为幼升小各科目标和暑期衔接安排。"
+    },
+    {
+      "id": "G1-00332905bfad0ce7",
+      "text": "想选太阳宫，上朝师附小，然后人朝，这样可以吗",
+      "reason": "评论提出太阳宫、朝师附小及人朝的拟选路线，属于具体升学路径求证。"
+    },
+    {
+      "id": "G1-00b1c526b6afc201",
+      "text": "想要常见字的材料",
+      "reason": "评论明确索取常见字材料，原帖仅用于补足材料面向幼升小准备，属于具体资源需求。"
+    },
+    {
+      "id": "G1-022b65aa228f530e",
+      "text": "这种大椅子得劲吗占地方不",
+      "reason": "具体询问学习椅舒适度和空间占用，属于准一年级学习空间尺寸决策。"
+    },
+    {
+      "id": "G1-0362af3e10475d19",
+      "text": "牛津自然拼读吗  线下上课吗",
+      "reason": "在幼升小家庭陪学语境中询问具体课程体系和授课形式，属于课程选择咨询。"
+    },
+    {
+      "id": "G1-09470b78ccc4545e",
+      "text": "还有一种左右分着的，左边有3个，右边有5个，左边划去1个，右边划去5个，综合算式怎么写？",
+      "reason": "直接完整描述看图列式题并询问综合算式，属于具体数学理解卡点；结合一上数学语境合理疑似家长。"
+    },
+    {
+      "id": "G1-0a1c5aa8d4b7ff97",
+      "text": "能分享这张表格吗？",
+      "reason": "评论具体请求分享“这张表格”，结合原帖可知与幼升小目标或暑期安排有关，属于明确资源索取。"
+    },
+    {
+      "id": "G1-0ee6a0853299bfb2",
+      "text": "你们一篇文章读几遍，需不需要读完说故事情节，我们读两遍过两天都忘的差不多了",
+      "reason": "评论者自述读两遍后仍遗忘，并询问是否需要复述情节，属于具体阅读方法困惑。"
+    }
+  ]
+}

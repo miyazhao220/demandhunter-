@@ -595,7 +595,7 @@
       </div>
     </header>
 
-    <div class="notice">本页不重新采集数据。当前人群为小学一年级家长；顶部卡片用于定位家长最关心的问题，点开后继续看具体需求、评论证据、供给与缺口。</div>
+    <div class="notice">顶部卡片用于定位家长最关心的问题，点开后继续看具体需求、评论证据、供给与缺口。</div>
     <div id="sampleLine" class="sample-line"></div>
     <div id="app" class="loading">正在读取已有样本数据...</div>
   </div>
@@ -604,7 +604,7 @@
   <script>
     const RADAR_CONFIG = window.RADAR_CONFIG || JSON.parse(document.getElementById("radar-config")?.textContent || "{}");
     const AGE_MODE = RADAR_CONFIG.mode === "age";
-    const LEGACY_DATA_URL = "grade1-data.json?v=016";
+    const LEGACY_DATA_URL = "grade1-data.json?v=017";
     const DATA_URL = RADAR_CONFIG.dataUrl || (AGE_MODE ? RADAR_CONFIG.dataUrl : LEGACY_DATA_URL);
 
     const OPPORTUNITIES = [
@@ -743,7 +743,7 @@
     function visibleOpportunities() {
       const rows = AGE_MODE ? mapData.opportunities || [] : legacyThemeDomains();
       if (AGE_MODE) return rows.filter(opp => selectedAudience === "all" || opp.audience_id === selectedAudience);
-      return rows.filter(opp => countComments(opp) > 0);
+      return rows;
     }
 
     function legacyThemeDomains() {
@@ -971,7 +971,7 @@
       const recon = mapData.count_reconciliation || {};
       if (AGE_MODE) return "";
       const cardCount = visibleOpportunities().reduce((sum, opp) => sum + countComments(opp), 0);
-      return `<section class="evidence-policy"><strong>口径说明：</strong>有效需求评论 ${formatNum(stats.valid_comment_count)} 条，是过滤营销、低信号、未匹配和间接需求后的家长需求评论；当前主题内评论 ${formatNum(cardCount)} 条，是已经归入本页 ${formatNum(visibleOpportunities().length)} 个一级主题的有效评论。未进入主题的评论保留在页面底部台账中，供复核和后续补簇。</section>`;
+      return `<section class="evidence-policy"><strong>口径说明：</strong>主需求证据 ${formatNum(stats.valid_comment_count)} 条，是逐条语义判断后确认属于目标家长的具体问题、咨询、经历或使用反馈；当前主题内评论 ${formatNum(cardCount)} 条。间接需求、未匹配、一般观点、人群不符和拦截项不进入主计数，均保留在页面底部台账中。</section>`;
     }
 
     function renderSampleLine() {
@@ -997,10 +997,14 @@
       const scopeText = sampleScopeText();
       sampleLine.innerHTML = [
         `<span class="pill">原始评论 ${formatNum(stats.raw_comment_count)}</span>`,
-        `<span class="pill">有效需求评论 ${formatNum(stats.valid_comment_count)}</span>`,
-        `<span class="pill">主题内评论 ${formatNum(visibleOpportunities().reduce((sum, opp) => sum + countComments(opp), 0))}</span>`,
-        `<span class="pill">有效小红书 ${formatNum(sourceCounts["小红书"])}</span>`,
-        `<span class="pill">有效抖音 ${formatNum(sourceCounts["抖音"])}</span>`,
+        `<span class="pill">主需求证据 ${formatNum(stats.valid_comment_count)}</span>`,
+        `<span class="pill">间接需求 ${formatNum(stats.indirect_signal_count)}</span>`,
+        `<span class="pill">未匹配 ${formatNum(stats.unmatched_comment_count)}</span>`,
+        `<span class="pill">一般观点 ${formatNum(stats.low_signal_count)}</span>`,
+        `<span class="pill">拦截 ${formatNum(stats.intercepted_comment_count)}</span>`,
+        `<span class="pill">人群不符 ${formatNum(stats.out_of_scope_count)}</span>`,
+        `<span class="pill">小红书主证据 ${formatNum(sourceCounts["小红书"])}</span>`,
+        `<span class="pill">抖音主证据 ${formatNum(sourceCounts["抖音"])}</span>`,
         `<span class="pill">帖子/视频 ${formatNum(stats.post_count)}</span>`,
         `<span class="pill">搜索第一页样本${scopeText ? ` · ${escapeHtml(scopeText)}` : ""}</span>`
       ].join("");
@@ -1186,8 +1190,7 @@
 
     function renderDetails(opp) {
       const clusters = findClusters(opp);
-      const secondaryCount = opp.themeIds.reduce((sum, themeId) => sum + (findTheme(themeId)?.secondary_route_count || 0), 0);
-      if (!AGE_MODE) return renderThemeDomainDetails(opp, clusters, secondaryCount);
+      if (!AGE_MODE) return renderThemeDomainDetails(opp, clusters);
       return `
         <div class="judgement">
           <div class="fact"><div class="fact-label">谁</div><div class="fact-value">${escapeHtml(opp.who)}</div></div>
@@ -1208,18 +1211,16 @@
           </section>
           <section class="section cluster-section">
             <h2>${AGE_MODE ? "关联需求簇" : "需求簇与机会假设"}</h2>
-            ${secondaryCount ? `<p>因工具/兴趣班等硬优先路由转出 ${formatNum(secondaryCount)} 条，已记录为副簇计数，不在此处发散展示。</p>` : ""}
             <div class="cluster-list">${clusters.map(cluster => renderClusterRow(opp, cluster)).join("")}</div>
           </section>
         </div>
       `;
     }
 
-    function renderThemeDomainDetails(opp, clusters, secondaryCount) {
+    function renderThemeDomainDetails(opp, clusters) {
       return `
         <section class="section cluster-section">
           <h2>需求簇</h2>
-          ${secondaryCount ? `<p>因工具/兴趣班等硬优先路由转出 ${formatNum(secondaryCount)} 条，已记录为副簇计数，不在此处发散展示。</p>` : ""}
           <div class="cluster-list">${clusters.map(cluster => renderClusterRow(opp, cluster)).join("")}</div>
         </section>
       `;
@@ -1289,7 +1290,7 @@
     }
 
     function renderOpportunityHypothesisCard(opp, subNeed, totalEvidence, counts) {
-      const hypothesis = buildSubNeedOpportunityHypothesis(opp, subNeed, totalEvidence, counts);
+      const hypothesis = subNeed.opportunity_hypothesis || buildSubNeedOpportunityHypothesis(opp, subNeed, totalEvidence, counts);
       return `<section class="hypothesis-card">
         <div class="hypothesis-head">
           <div>
@@ -1609,9 +1610,9 @@
     function renderLegacyAppendices() {
       if (AGE_MODE) return "";
       return renderPoolSection("indirect", "间接需求信号", mapData.indirect_signal_pool, "indirect_reason", "机构/B2B/软广帖下疑似家长咨询，未计入主计数，作为访谈验证线索。")
-        + renderPoolSection("calibration-background", "人工校准降级为背景", mapData.calibration_background_pool, "calibration_reason", "人工标注认为与主题相关但不足以作为需求证据的评论，已从主计数移出。")
-        + renderPoolSection("calibration-pending", "人工校准待处理", mapData.calibration_pending_pool, "calibration_reason", "人工标注存在冲突、建议新增/拆簇/合并簇或目标簇无法自动匹配，需人工确认后再回流。")
+        + renderPoolSection("low-signal", "低信号与一般观点", mapData.low_signal_pool, "low_signal_reason", "逐条理解后未发现目标家长的具体问题、咨询、经历或使用反馈，不进入需求主计数。")
         + renderPoolSection("unmatched", "未匹配池", mapData.unmatched_pool, "unmatched_reason", "短评论语义不足或无法稳定归簇的评论，不强行归入主题。")
+        + renderPoolSection("out-of-scope", "人群不符", mapData.out_of_scope_pool, "exclusion_reason", "明确属于其他年龄、学段或角色的评论，不作为小学一年级家长需求证据。")
         + renderPoolSection("intercept", "拦截台账", mapData.intercept_pool, "intercept_reason", "营销/引流、同行互评等不进入需求证据，但保留可追溯原因。")
         + renderCountComparison();
     }
